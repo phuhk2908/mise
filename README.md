@@ -154,3 +154,4 @@ Mise is currently in active development. The codebase follows these conventions:
 ## License
 
 MIT
+# mise
