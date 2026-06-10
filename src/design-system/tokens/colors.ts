@@ -1,0 +1,80 @@
+export interface Colors {
+  primary: string;
+  primaryLight: string;
+  accent: string;
+  tan: string;
+  brown: string;
+  success: string;
+  warning: string;
+  error: string;
+  info: string;
+  successContainer: string;
+  background: string;
+  surface: string;
+  card: string;
+  outline: string;
+  outlineStrong: string;
+  textPrimary: string;
+  textSecondary: string;
+  textMuted: string;
+  white: string;
+  black: string;
+  neutral50?: string;
+  neutral100?: string;
+  neutral200?: string;
+  neutral700?: string;
+  neutral800?: string;
+  neutral900?: string;
+}
+
+export const lightColors: Colors = {
+  primary: "#4C5A3B",
+  primaryLight: "#7BAA63",
+  neutral50: "#FAF6F0",
+  neutral100: "#F4EDE2",
+  neutral200: "#E6DDC6",
+  accent: "#C9723B",
+  tan: "#DDB68A",
+  brown: "#5B4636",
+  success: "#4CAF6A",
+  warning: "#E0A93E",
+  error: "#E15558",
+  info: "#4A90E2",
+  successContainer: "#EBF3EA",
+  background: "#FAF6F0",
+  surface: "#FFFFFF",
+  card: "#FFFFFF",
+  outline: "#E6E0D6",
+  outlineStrong: "#D0C6B7",
+  textPrimary: "#1A1C18",
+  textSecondary: "#5B5F54",
+  textMuted: "#8A8D84",
+  white: "#FFFFFF",
+  black: "#000000",
+};
+
+export const darkColors: Colors = {
+  primary: "#7BAA63",
+  primaryLight: "#94A37A",
+  neutral900: "#0F0F0F",
+  neutral800: "#1A1C18",
+  neutral700: "#2A2D28",
+  accent: "#E0804A",
+  tan: "#DAA67A",
+  brown: "#7A5A3E",
+  success: "#4CAF6A",
+  warning: "#F2B84B",
+  error: "#FF6B6B",
+  info: "#6CA8FF",
+  successContainer: "#1E2A1F",
+  background: "#0F0F0F",
+  surface: "#1A1C18",
+  card: "#1A1C18",
+  outline: "#343830",
+  outlineStrong: "#4A4F49",
+  textPrimary: "#FAF6F0",
+  textSecondary: "#D6D0C4",
+  textMuted: "#9B9F94",
+  white: "#FFFFFF",
+  black: "#000000",
+};
