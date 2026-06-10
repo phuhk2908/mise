@@ -4,6 +4,7 @@ import {
   View,
   Pressable,
   TextInput as RNTextInput,
+  ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
@@ -25,6 +26,10 @@ import {
   useAppTheme,
 } from "../src/design-system";
 import { useAISettings } from "../src/hooks/useAISettings";
+import {
+  fetchPublicModels,
+  OLLAMA_DEFAULT_BASE_URL,
+} from "../src/ai/ollama";
 
 const PROVIDER_OPTIONS: Array<{ value: "ollama"; label: string }> = [
   { value: "ollama", label: "Ollama" },
@@ -48,23 +53,45 @@ export default function AISettingsScreen() {
 
   const [provider, setProvider] = useState<"ollama">("ollama");
   const [model, setModel] = useState("");
-  const [baseUrl, setBaseUrl] = useState("");
+  const [baseUrl, setBaseUrl] = useState(OLLAMA_DEFAULT_BASE_URL);
   const [apiKey, setApiKey] = useState("");
   const [showKey, setShowKey] = useState(false);
   const [hasSavedKey, setHasSavedKey] = useState(false);
+  const [availableModels, setAvailableModels] = useState<string[]>([]);
+  const [fetchingModels, setFetchingModels] = useState(false);
 
   // Sync local state when config loads
   useEffect(() => {
     if (config) {
       setProvider(config.provider);
       setModel(config.model);
-      setBaseUrl(config.baseUrl);
+      setBaseUrl(config.baseUrl || OLLAMA_DEFAULT_BASE_URL);
       setApiKey(config.apiKey);
       setHasSavedKey(true);
     } else {
+      setBaseUrl(OLLAMA_DEFAULT_BASE_URL);
       setHasSavedKey(false);
     }
   }, [config]);
+
+  // Fetch public model list from ollama.com on mount
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      setFetchingModels(true);
+      try {
+        const models = await fetchPublicModels();
+        if (!cancelled) setAvailableModels(models);
+      } catch {
+        // silently fail — manual input remains available
+      } finally {
+        if (!cancelled) setFetchingModels(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const handleSave = useCallback(async () => {
     await save({
@@ -79,7 +106,7 @@ export default function AISettingsScreen() {
   const handleClear = useCallback(async () => {
     await clear();
     setModel("");
-    setBaseUrl("");
+    setBaseUrl(OLLAMA_DEFAULT_BASE_URL);
     setApiKey("");
     setHasSavedKey(false);
     setShowKey(false);
@@ -176,12 +203,78 @@ export default function AISettingsScreen() {
           </View>
 
           {/* Model */}
-          <Input
-            label={t("aiSettings.model")}
-            placeholder={t("aiSettings.modelPlaceholder")}
-            value={model}
-            onChangeText={setModel}
-          />
+          <View className="gap-2">
+            <ThemedText variant="caption" color="secondary">
+              {t("aiSettings.model")}
+            </ThemedText>
+            <RNTextInput
+              className="min-h-11 rounded-xl border px-3"
+              style={{
+                borderColor: colors.outline,
+                backgroundColor: colors.surface,
+                color: colors.textPrimary,
+                fontFamily: "Baloo2-Regular",
+                fontSize: 14,
+                lineHeight: 20,
+                height: 44,
+              }}
+              placeholder={t("aiSettings.modelPlaceholder")}
+              placeholderTextColor={colors.textMuted}
+              value={model}
+              onChangeText={setModel}
+              autoCapitalize="none"
+            />
+
+            {/* Public model suggestions */}
+            {fetchingModels ? (
+              <View className="flex-row items-center gap-2 py-1">
+                <ActivityIndicator size="small" color={colors.primary} />
+                <ThemedText variant="caption" color="muted">
+                  {t("aiSettings.fetchingModels")}
+                </ThemedText>
+              </View>
+            ) : availableModels.length > 0 ? (
+              <View className="gap-2">
+                <ThemedText variant="caption" color="muted">
+                  {t("aiSettings.popularModels")}
+                </ThemedText>
+                <View className="flex-row flex-wrap gap-2">
+                  {availableModels.slice(0, 20).map((m) => {
+                    const active = model === m;
+                    return (
+                      <Pressable
+                        key={m}
+                        onPress={() => setModel(m)}
+                        className="rounded-full border px-3 py-1.5"
+                        style={{
+                          backgroundColor: active
+                            ? colors.primary + "15"
+                            : colors.surface,
+                          borderColor: active
+                            ? colors.primary
+                            : colors.outline,
+                        }}
+                      >
+                        <ThemedText
+                          variant="caption"
+                          style={{
+                            color: active
+                              ? colors.primary
+                              : colors.textSecondary,
+                            fontFamily: active
+                              ? "Baloo2-SemiBold"
+                              : "Baloo2-Regular",
+                          }}
+                        >
+                          {m}
+                        </ThemedText>
+                      </Pressable>
+                    );
+                  })}
+                </View>
+              </View>
+            ) : null}
+          </View>
 
           {/* Base URL */}
           <Input

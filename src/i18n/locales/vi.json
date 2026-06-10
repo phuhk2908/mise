@@ -269,7 +269,9 @@
     "testSuccess": "Kết nối thành công.",
     "testNotConfigured": "Vui lòng điền đầy đủ thông tin trước.",
     "save": "Lưu cài đặt",
-    "clear": "Xóa cài đặt"
+    "clear": "Xóa cài đặt",
+    "popularModels": "Các mô hình phổ biến từ ollama.com",
+    "fetchingModels": "Đang tải danh sách mô hình..."
   },
   "aiErrors": {
     "notConfigured": "Chưa cấu hình nhà cung cấp AI.",

@@ -5,6 +5,8 @@
 import { AIError } from "./types";
 import type { AIConfig } from "./types";
 
+export const OLLAMA_DEFAULT_BASE_URL = "http://localhost:11434";
+
 const REQUEST_TIMEOUT_MS = 30000;
 
 async function fetchWithTimeout(
@@ -113,5 +115,25 @@ export async function listModels(config: AIConfig): Promise<void> {
       throw new AIError("TIMEOUT", "Could not connect to Ollama. Please check your server URL.");
     }
     throw new AIError("NETWORK_ERROR", err instanceof Error ? err.message : String(err));
+  }
+}
+
+/**
+ * Fetch the list of publicly available models from ollama.com.
+ * This does not require authentication and is used for model discovery.
+ */
+export async function fetchPublicModels(): Promise<string[]> {
+  try {
+    const response = await fetchWithTimeout(
+      "https://ollama.com/api/tags",
+      { method: "GET" },
+      15000
+    );
+    if (!response.ok) return [];
+    const data = await response.json();
+    const models: Array<{ name: string }> = data.models ?? [];
+    return models.map((m) => m.name).sort();
+  } catch {
+    return [];
   }
 }

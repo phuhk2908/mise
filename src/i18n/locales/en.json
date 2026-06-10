@@ -269,7 +269,9 @@
     "testSuccess": "Connection successful.",
     "testNotConfigured": "Please fill in all fields first.",
     "save": "Save Settings",
-    "clear": "Clear Settings"
+    "clear": "Clear Settings",
+    "popularModels": "Popular models from ollama.com",
+    "fetchingModels": "Loading models..."
   },
   "aiErrors": {
     "notConfigured": "AI Provider is not configured.",
