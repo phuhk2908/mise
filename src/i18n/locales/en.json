@@ -30,7 +30,9 @@
     "tapToEdit": "Tap to edit",
     "noItems": "No items listed.",
     "seeAll": "See all",
-    "minutes": "min"
+    "minutes": "min",
+    "or": "or",
+    "categories": "Categories"
   },
   "home": {
     "title": "Home",
@@ -110,6 +112,7 @@
     "checkedCount": "{{checked}}/{{total}} checked",
     "totalItems": "{{total}} items",
     "clearChecked": "Clear checked items",
+    "allRecipes": "All Recipes",
     "clearing": "Clearing...",
     "categories": {
       "produce": "Produce",
@@ -172,22 +175,19 @@
       "takePhoto": "Take Photo",
       "chooseGallery": "Choose from Gallery",
       "tipsTitle": "Tips for best results",
-      "tipsDesc": "Good lighting, minimal shadows, and a clear view work best."
+      "tipsDesc": "Good lighting, minimal shadows, and a clear view work best.",
+      "removeImage": "Remove image",
+      "permissionRequired": "Camera permission is required to take photos."
     },
     "voice": {
-      "heading": "Tap to start speaking",
-      "subheading": "Try saying something like:",
-      "sampleQuote": "Two tablespoons of fish sauce and half a kilo of pork belly",
-      "understandTitle": "We'll understand and organize your ingredients and steps.",
-      "worksOffline": "Works offline",
-      "listening": "Listening",
+      "pressToRecord": "Tap the mic to record",
       "recording": "Recording...",
-      "processing": "Processing...",
-      "done": "Done",
-      "error": "Error",
-      "keepSpeaking": "Keep speaking — tap the red button when you're done.",
-      "transcriptPreview": "Transcript",
-      "transcriptEmpty": "Transcript will appear here as you speak..."
+      "tapToStop": "Tap again to stop",
+      "processing": "Processing audio...",
+      "tipTitle": "Speak your recipe",
+      "tipDesc": "Describe ingredients and steps out loud. We'll extract them for you.",
+      "noRecordingUri": "No recording found. Please try again.",
+      "couldNotAccessMic": "Could not access microphone."
     }
   },
   "editRecipe": {
@@ -212,7 +212,8 @@
     "addStep": "Add Step",
     "stepPlaceholder": "Step {{number}}",
     "save": "Save Changes",
-    "saving": "Saving..."
+    "saving": "Saving...",
+    "saveError": "Failed to save recipe"
   },
   "more": {
     "title": "More",
@@ -258,6 +259,9 @@
     "connectTitle": "Connect AI Provider",
     "connectDesc": "Mise uses AI to help extract recipes from text or voice. Your API key is stored on this device and is not sent to Mise servers.",
     "provider": "Provider",
+    "serverType": "Server Type",
+    "local": "Local",
+    "cloud": "Cloud",
     "model": "Model",
     "modelPlaceholder": "e.g. gemma3",
     "baseUrl": "Server URL",
@@ -287,21 +291,22 @@
     "lowConfidenceTitle": "Review Carefully",
     "lowConfidenceDesc": "Mise is not fully confident about this recipe. Please review it before saving.",
     "warningsTitle": "Warnings",
-    "extractedFrom": "Extracted from text",
+    "extractedFrom": "Extracted successfully",
     "saveRecipe": "Save Recipe",
     "discard": "Discard",
+    "parseError": "Failed to parse draft.",
     "discardConfirmTitle": "Discard Draft?",
     "discardConfirmDesc": "This recipe draft will be lost.",
-    "categoryPlaceholder": "Add category"
+    "categoryPlaceholder": "Add category",
+    "notes": "Notes",
+    "notesPlaceholder": "Any extra notes..."
   },
   "addRecipe.ai": {
     "notConfiguredTitle": "AI Provider is not configured.",
     "notConfiguredDesc": "To use AI features, choose a provider and enter your API key.",
     "openSettings": "Open AI Settings",
     "pasteText": "Paste recipe text here...",
-    "pasteTranscript": "Paste your transcript here...",
     "extractRecipe": "Extract Recipe",
-    "parseTranscript": "Parse Transcript",
     "extracting": "Extracting..."
   },
   "dialogs": {
@@ -309,6 +314,28 @@
     "resetDesc": "This will permanently delete all recipes, meal plans, and shopping lists. This action cannot be undone.",
     "confirmDelete": "Delete Everything",
     "cancel": "Cancel"
+  },
+  "categories": {
+    "breakfast": "Breakfast",
+    "lunch": "Lunch",
+    "dinner": "Dinner",
+    "snack": "Snack",
+    "dessert": "Dessert",
+    "vietnamese": "Vietnamese",
+    "homeCooking": "Home Cooking",
+    "mainDish": "Main Dish",
+    "soup": "Soup",
+    "stirFry": "Stir-fry",
+    "fried": "Fried",
+    "grilled": "Grilled",
+    "steamed": "Steamed",
+    "boiled": "Boiled",
+    "drink": "Drink",
+    "sweet": "Sweet",
+    "healthy": "Healthy",
+    "quick": "Quick",
+    "easy": "Easy",
+    "mealPrep": "Meal Prep"
   },
   "privacy": {
     "title": "Privacy Policy",
@@ -345,6 +372,12 @@
     "changesBody": "We may update the app and these terms over time. Continuing to use the app after changes means you accept the new terms.",
     "liabilityTitle": "6. Limitation of Liability",
     "liabilityBody": "To the extent permitted by law, we are not liable for any indirect, incidental, or consequential damages arising from the use of the app."
+  },
+  "voice": {
+    "notAvailable": "Speech recognition is not available on this device.",
+    "permissionRequired": "Microphone and speech recognition permissions are required to record voice.",
+    "permissionFailed": "Failed to request microphone permission.",
+    "startFailed": "Failed to start recording."
   },
   "dataSafety": {
     "title": "Data Safety",

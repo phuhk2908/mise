@@ -11,6 +11,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { useTranslation } from "react-i18next";
+import type { TFunction } from "i18next";
 import { useMutation } from "convex/react";
 import { HugeiconsIcon } from "@hugeicons/react-native";
 import {
@@ -56,6 +57,34 @@ const KNOWN_CATEGORIES = [
   "Meal Prep",
 ];
 
+function translateCategory(cat: string, t: TFunction): string {
+  const key = cat.toLowerCase().replace(/[^a-z]/g, "");
+  const map: Record<string, string> = {
+    breakfast: "categories.breakfast",
+    lunch: "categories.lunch",
+    dinner: "categories.dinner",
+    snack: "categories.snack",
+    dessert: "categories.dessert",
+    vietnamese: "categories.vietnamese",
+    homecooking: "categories.homeCooking",
+    maindish: "categories.mainDish",
+    soup: "categories.soup",
+    stirfry: "categories.stirFry",
+    fried: "categories.fried",
+    grilled: "categories.grilled",
+    steamed: "categories.steamed",
+    boiled: "categories.boiled",
+    drink: "categories.drink",
+    sweet: "categories.sweet",
+    healthy: "categories.healthy",
+    quick: "categories.quick",
+    easy: "categories.easy",
+    mealprep: "categories.mealPrep",
+  };
+  const translationKey = map[key];
+  return translationKey ? t(translationKey) : cat;
+}
+
 let nextId = 1;
 function genId() {
   return `ai-${Date.now()}-${++nextId}`;
@@ -82,7 +111,7 @@ export default function AIReviewScreen() {
         categories: [],
         notes: "",
         confidence: "low",
-        warnings: ["Failed to parse draft."],
+        warnings: [t("aiReview.parseError")],
       };
     }
   });
@@ -621,13 +650,13 @@ export default function AIReviewScreen() {
           {/* Categories */}
           <View className="gap-2">
             <ThemedText variant="body" style={{ fontFamily: "Baloo2-SemiBold" }}>
-              {t("recipes.tags.all")}
+              {t("common.categories")}
             </ThemedText>
             <View className="flex-row flex-wrap gap-2">
               {KNOWN_CATEGORIES.map((cat) => (
                 <Chip
                   key={cat}
-                  label={cat}
+                  label={translateCategory(cat, t)}
                   selected={categories.includes(cat)}
                   onPress={() => toggleCategory(cat)}
                 />
@@ -670,7 +699,7 @@ export default function AIReviewScreen() {
           {/* Notes */}
           <View className="gap-3">
             <ThemedText variant="body" style={{ fontFamily: "Baloo2-SemiBold" }}>
-              {t("addRecipe.manual.description")}
+              {t("aiReview.notes")}
             </ThemedText>
             <TextInput
               className="min-h-20 rounded-xl border px-4 py-3"
@@ -682,7 +711,7 @@ export default function AIReviewScreen() {
                 fontSize: 14,
                 textAlignVertical: "top",
               }}
-              placeholder="Notes..."
+              placeholder={t("aiReview.notesPlaceholder")}
               placeholderTextColor={colors.textMuted}
               value={notes}
               onChangeText={setNotes}

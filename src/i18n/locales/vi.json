@@ -30,7 +30,9 @@
     "tapToEdit": "Nhấn để sửa",
     "noItems": "Không có mục nào.",
     "seeAll": "Xem tất cả",
-    "minutes": "phút"
+    "minutes": "phút",
+    "or": "hoặc",
+    "categories": "Danh mục"
   },
   "home": {
     "title": "Trang chủ",
@@ -110,6 +112,7 @@
     "checkedCount": "{{checked}}/{{total}} đã chọn",
     "totalItems": "{{total}} mục",
     "clearChecked": "Xóa các mục đã chọn",
+    "allRecipes": "Tất cả công thức",
     "clearing": "Đang xóa...",
     "categories": {
       "produce": "Rau củ",
@@ -172,22 +175,19 @@
       "takePhoto": "Chụp ảnh",
       "chooseGallery": "Chọn từ thư viện",
       "tipsTitle": "Mẹo để kết quả tốt nhất",
-      "tipsDesc": "Ánh sáng tốt, ít bóng tối và góc nhìn rõ ràng sẽ cho kết quả tốt nhất."
+      "tipsDesc": "Ánh sáng tốt, ít bóng tối và góc nhìn rõ ràng sẽ cho kết quả tốt nhất.",
+      "removeImage": "Xóa ảnh",
+      "permissionRequired": "Cần quyền truy cập máy ảnh để chụp ảnh."
     },
     "voice": {
-      "heading": "Nhấn để bắt đầu nói",
-      "subheading": "Thử nói như sau:",
-      "sampleQuote": "Hai muỗng canh nước mắm và nửa ký thịt ba chỉ",
-      "understandTitle": "Chúng tôi sẽ hiểu và sắp xếp nguyên liệu và các bước của bạn.",
-      "worksOffline": "Hoạt động ngoại tuyến",
-      "listening": "Đang nghe",
-      "recording": "Đang ghi...",
-      "processing": "Đang xử lý...",
-      "done": "Hoàn tất",
-      "error": "Lỗi",
-      "keepSpeaking": "Tiếp tục nói — nhấn nút đỏ khi bạn xong.",
-      "transcriptPreview": "Bản ghi",
-      "transcriptEmpty": "Bản ghi sẽ hiển thị ở đây khi bạn nói..."
+      "pressToRecord": "Nhấn mic để ghi âm",
+      "recording": "Đang ghi âm...",
+      "tapToStop": "Nhấn lại để dừng",
+      "processing": "Đang xử lý âm thanh...",
+      "tipTitle": "Nói công thức của bạn",
+      "tipDesc": "Mô tả nguyên liệu và các bước bằng lời. Chúng tôi sẽ trích xuất cho bạn.",
+      "noRecordingUri": "Không tìm thấy bản ghi. Vui lòng thử lại.",
+      "couldNotAccessMic": "Không thể truy cập micro."
     }
   },
   "editRecipe": {
@@ -212,7 +212,8 @@
     "addStep": "Thêm bước",
     "stepPlaceholder": "Bước {{number}}",
     "save": "Lưu thay đổi",
-    "saving": "Đang lưu..."
+    "saving": "Đang lưu...",
+    "saveError": "Không thể lưu công thức"
   },
   "more": {
     "title": "Thêm",
@@ -258,6 +259,9 @@
     "connectTitle": "Kết nối nhà cung cấp AI",
     "connectDesc": "Mise sử dụng AI để hỗ trợ trích xuất công thức từ văn bản hoặc giọng nói. Khóa API của bạn được lưu trên thiết bị và không được gửi đến máy chủ Mise.",
     "provider": "Nhà cung cấp",
+    "serverType": "Loại máy chủ",
+    "local": "Cục bộ",
+    "cloud": "Đám mây",
     "model": "Mô hình",
     "modelPlaceholder": "ví dụ: gemma3",
     "baseUrl": "URL máy chủ",
@@ -287,21 +291,22 @@
     "lowConfidenceTitle": "Xem lại kỹ",
     "lowConfidenceDesc": "Mise không hoàn toàn tự tin về công thức này. Vui lòng xem lại trước khi lưu.",
     "warningsTitle": "Cảnh báo",
-    "extractedFrom": "Trích xuất từ văn bản",
+    "extractedFrom": "Trích xuất thành công",
     "saveRecipe": "Lưu công thức",
     "discard": "Hủy",
+    "parseError": "Không thể phân tích bản nháp.",
     "discardConfirmTitle": "Hủy bản nháp?",
     "discardConfirmDesc": "Bản nháp công thức này sẽ bị mất.",
-    "categoryPlaceholder": "Thêm danh mục"
+    "categoryPlaceholder": "Thêm danh mục",
+    "notes": "Ghi chú",
+    "notesPlaceholder": "Thêm ghi chú..."
   },
   "addRecipe.ai": {
     "notConfiguredTitle": "Chưa cấu hình nhà cung cấp AI.",
     "notConfiguredDesc": "Để sử dụng tính năng AI, hãy chọn nhà cung cấp và nhập khóa API.",
     "openSettings": "Mở Cài đặt AI",
     "pasteText": "Dán văn bản công thức vào đây...",
-    "pasteTranscript": "Dán bản ghi của bạn vào đây...",
     "extractRecipe": "Trích xuất công thức",
-    "parseTranscript": "Phân tích bản ghi",
     "extracting": "Đang trích xuất..."
   },
   "dialogs": {
@@ -309,6 +314,28 @@
     "resetDesc": "Thao tác này sẽ xóa vĩnh viễn tất cả công thức, thực đơn và danh sách mua sắm. Không thể hoàn tác.",
     "confirmDelete": "Xóa tất cả",
     "cancel": "Hủy"
+  },
+  "categories": {
+    "breakfast": "Bữa sáng",
+    "lunch": "Bữa trưa",
+    "dinner": "Bữa tối",
+    "snack": "Ăn nhẹ",
+    "dessert": "Tráng miệng",
+    "vietnamese": "Món Việt",
+    "homeCooking": "Nấu tại nhà",
+    "mainDish": "Món chính",
+    "soup": "Canh / Súp",
+    "stirFry": "Xào",
+    "fried": "Chiên",
+    "grilled": "Nướng",
+    "steamed": "Hấp",
+    "boiled": "Luộc",
+    "drink": "Đồ uống",
+    "sweet": "Ngọt",
+    "healthy": "Lành mạnh",
+    "quick": "Nhanh",
+    "easy": "Dễ làm",
+    "mealPrep": "Chuẩn bị bữa ăn"
   },
   "privacy": {
     "title": "Chính sách quyền riêng tư",
@@ -345,6 +372,12 @@
     "changesBody": "Chúng tôi có thể cập nhật ứng dụng và các điều khoản này theo thời gian. Việc tiếp tục sử dụng ứng dụng sau khi có thay đổi đồng nghĩa với việc bạn chấp nhận các điều khoản mới.",
     "liabilityTitle": "6. Giới hạn trách nhiệm",
     "liabilityBody": "Trong phạm vi pháp luật cho phép, chúng tôi không chịu trách nhiệm cho bất kỳ thiệt hại gián tiếp, ngẫu nhiên hoặc hậu quả nào phát sinh từ việc sử dụng ứng dụng."
+  },
+  "voice": {
+    "notAvailable": "Thiết bị của bạn không hỗ trợ nhận diện giọng nói.",
+    "permissionRequired": "Cần quyền truy cập micro và nhận diện giọng nói để ghi âm.",
+    "permissionFailed": "Không thể yêu cầu quyền micro.",
+    "startFailed": "Không thể bắt đầu ghi âm."
   },
   "dataSafety": {
     "title": "An toàn dữ liệu",
