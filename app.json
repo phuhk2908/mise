@@ -9,7 +9,11 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSMicrophoneUsageDescription": "Mise uses the microphone to transcribe your spoken recipes into text.",
+        "NSSpeechRecognitionUsageDescription": "Mise uses speech recognition to turn your voice into structured recipes."
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -38,7 +42,8 @@
           }
         }
       ],
-      "expo-secure-store"
+      "expo-secure-store",
+      "expo-speech-recognition"
     ],
     "experiments": {
       "typedRoutes": true,

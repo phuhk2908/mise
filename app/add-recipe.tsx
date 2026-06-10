@@ -22,6 +22,7 @@ import {
   ImageAdd01Icon,
   Mic01Icon,
   CheckmarkCircle01Icon,
+  Cancel01Icon,
   SparklesIcon,
 } from "@hugeicons/core-free-icons";
 import {
@@ -38,6 +39,7 @@ import type { Ingredient, Instruction } from "../src/types";
 import { useAISettings } from "../src/hooks/useAISettings";
 import { extractRecipeFromText } from "../src/ai/extract";
 import type { AIParsedRecipeDraft } from "../src/ai/types";
+import { useVoiceRecording } from "../src/hooks/useVoiceRecording";
 
 type TabKey = "manual" | "photo" | "voice";
 
@@ -106,6 +108,32 @@ export default function AddRecipeScreen() {
   const [voiceText, setVoiceText] = useState("");
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState<string | null>(null);
+
+  // ── Voice recording state ──
+  const {
+    state: voiceState,
+    transcript: voiceTranscript,
+    error: voiceError,
+    isSupported: voiceSupported,
+    startRecording,
+    stopRecording,
+    reset: resetVoice,
+  } = useVoiceRecording();
+  const [recordingSeconds, setRecordingSeconds] = useState(0);
+
+  useEffect(() => {
+    let interval: ReturnType<typeof setInterval> | null = null;
+    if (voiceState === "recording") {
+      interval = setInterval(() => {
+        setRecordingSeconds((s) => s + 1);
+      }, 1000);
+    } else {
+      setRecordingSeconds(0);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [voiceState]);
 
   const addIngredient = () => {
     setIngredients((prev) => [
@@ -730,13 +758,31 @@ export default function AddRecipeScreen() {
 
           {activeTab === "voice" && (
             <>
-              <View className="items-center gap-6 py-8">
+              {/* Mic / Recording UI */}
+              <View className="items-center gap-4 py-6">
+                {/* Mic button */}
                 <Pressable
+                  onPress={() => {
+                    if (voiceState === "recording" || voiceState === "processing") {
+                      stopRecording();
+                    } else if (voiceState === "done") {
+                      resetVoice();
+                    } else {
+                      startRecording();
+                    }
+                  }}
+                  disabled={!voiceSupported || voiceState === "processing" || voiceState === "requesting"}
                   className="h-24 w-24 items-center justify-center rounded-full"
                   style={({ pressed }) => ({
                     opacity: pressed ? 0.8 : 1,
-                    backgroundColor: colors.primary,
-                    shadowColor: colors.primary,
+                    backgroundColor:
+                      voiceState === "recording" || voiceState === "processing"
+                        ? colors.error
+                        : colors.primary,
+                    shadowColor:
+                      voiceState === "recording" || voiceState === "processing"
+                        ? colors.error
+                        : colors.primary,
                     shadowOffset: { width: 0, height: 4 },
                     shadowOpacity: 0.3,
                     shadowRadius: 12,
@@ -744,61 +790,180 @@ export default function AddRecipeScreen() {
                   })}
                 >
                   <HugeiconsIcon
-                    icon={Mic01Icon}
+                    icon={
+                      voiceState === "recording" || voiceState === "processing"
+                        ? Cancel01Icon
+                        : Mic01Icon
+                    }
                     size={36}
                     color={colors.white}
                     strokeWidth={1.75}
                   />
                 </Pressable>
 
-                <View className="items-center gap-2">
-                  <ThemedText variant="h4">{t("addRecipe.voice.heading")}</ThemedText>
-                  <ThemedText variant="bodySmall" color="secondary" style={{ textAlign: "center" }}>
-                    {t("addRecipe.voice.subheading")}
+                {/* Timer */}
+                {(voiceState === "recording" || voiceState === "processing") && (
+                  <ThemedText
+                    variant="body"
+                    style={{
+                      fontFamily: "Baloo2-SemiBold",
+                      color: colors.error,
+                    }}
+                  >
+                    {t("addRecipe.voice.listening")} {" "}
+                    {`${Math.floor(recordingSeconds / 60)
+                      .toString()
+                      .padStart(2, "0")}:${(recordingSeconds % 60)
+                      .toString()
+                      .padStart(2, "0")}`}
                   </ThemedText>
+                )}
+
+                {/* Status text */}
+                <View className="items-center gap-1">
+                  <ThemedText variant="h4">
+                    {voiceState === "recording"
+                      ? t("addRecipe.voice.recording")
+                      : voiceState === "processing"
+                      ? t("addRecipe.voice.processing")
+                      : voiceState === "done"
+                      ? t("addRecipe.voice.done")
+                      : voiceState === "error"
+                      ? t("addRecipe.voice.error")
+                      : t("addRecipe.voice.heading")}
+                  </ThemedText>
+                  <ThemedText
+                    variant="bodySmall"
+                    color="secondary"
+                    style={{ textAlign: "center" }}
+                  >
+                    {voiceState === "idle" || voiceState === "error"
+                      ? t("addRecipe.voice.subheading")
+                      : voiceState === "recording"
+                      ? t("addRecipe.voice.keepSpeaking")
+                      : null}
+                  </ThemedText>
+                </View>
+
+                {/* Sample quote (only when idle) */}
+                {voiceState === "idle" && (
                   <View
                     className="rounded-2xl border px-5 py-4"
-                    style={{ backgroundColor: colors.surface, borderColor: colors.outline }}
+                    style={{
+                      backgroundColor: colors.surface,
+                      borderColor: colors.outline,
+                    }}
                   >
-                    <ThemedText variant="bodySmall" color="secondary" style={{ textAlign: "center", fontStyle: "italic" }}>
+                    <ThemedText
+                      variant="bodySmall"
+                      color="secondary"
+                      style={{ textAlign: "center", fontStyle: "italic" }}
+                    >
                       "{t("addRecipe.voice.sampleQuote")}"
                     </ThemedText>
                   </View>
-                </View>
+                )}
               </View>
 
-              <View
-                className="rounded-2xl border px-4 py-4 gap-3"
-                style={{ backgroundColor: colors.surface, borderColor: colors.outline }}
-              >
-                <View className="flex-row items-center gap-2">
-                  <HugeiconsIcon
-                    icon={SparklesIcon}
-                    size={20}
-                    color={colors.primary}
-                    strokeWidth={1.75}
-                  />
-                  <View className="flex-1">
-                    <ThemedText variant="bodySmall" style={{ fontFamily: "Baloo2-SemiBold" }}>
-                      {t("addRecipe.voice.understandTitle")}
+              {/* Transcript preview */}
+              {(voiceState === "recording" ||
+                voiceState === "processing" ||
+                voiceState === "done") && (
+                <View className="gap-2">
+                  <ThemedText variant="bodySmall" style={{ fontFamily: "Baloo2-SemiBold" }}>
+                    {t("addRecipe.voice.transcriptPreview")}
+                  </ThemedText>
+                  <View
+                    className="min-h-24 rounded-xl border px-4 py-3"
+                    style={{
+                      backgroundColor: colors.surface,
+                      borderColor: colors.outline,
+                    }}
+                  >
+                    <ThemedText
+                      variant="bodySmall"
+                      color={voiceTranscript ? "primary" : "muted"}
+                    >
+                      {voiceTranscript || t("addRecipe.voice.transcriptEmpty")}
                     </ThemedText>
                   </View>
                 </View>
+              )}
 
-                <View className="flex-row items-center gap-2">
-                  <HugeiconsIcon
-                    icon={CheckmarkCircle01Icon}
-                    size={18}
-                    color={colors.success}
-                    strokeWidth={1.75}
-                  />
-                  <ThemedText variant="caption" color="secondary">
-                    {t("addRecipe.voice.worksOffline")}
-                  </ThemedText>
+              {/* Voice error */}
+              {voiceError ? (
+                <ThemedText variant="caption" color="error">
+                  {voiceError}
+                </ThemedText>
+              ) : null}
+              {aiError ? (
+                <ThemedText variant="caption" color="error">
+                  {aiError}
+                </ThemedText>
+              ) : null}
+
+              {/* Parse button (when transcript is ready) */}
+              {voiceState === "done" && voiceTranscript.trim() && (
+                <ThemedButton
+                  onPress={() => handleAIExtract(voiceTranscript)}
+                  disabled={aiLoading}
+                  loading={aiLoading}
+                >
+                  <View className="flex-row items-center gap-2">
+                    <HugeiconsIcon
+                      icon={SparklesIcon}
+                      size={18}
+                      color={isDark ? colors.neutral900! : colors.white}
+                      strokeWidth={1.75}
+                    />
+                    <ThemedText
+                      variant="bodySmall"
+                      style={{
+                        color: isDark ? colors.neutral900! : colors.white,
+                        fontFamily: "Baloo2-SemiBold",
+                      }}
+                    >
+                      {aiLoading ? t("addRecipe.ai.extracting") : t("addRecipe.ai.parseTranscript")}
+                    </ThemedText>
+                  </View>
+                </ThemedButton>
+              )}
+
+              {/* Tips card (only when idle) */}
+              {voiceState === "idle" && (
+                <View
+                  className="rounded-2xl border px-4 py-4 gap-3"
+                  style={{ backgroundColor: colors.surface, borderColor: colors.outline }}
+                >
+                  <View className="flex-row items-center gap-2">
+                    <HugeiconsIcon
+                      icon={SparklesIcon}
+                      size={20}
+                      color={colors.primary}
+                      strokeWidth={1.75}
+                    />
+                    <View className="flex-1">
+                      <ThemedText variant="bodySmall" style={{ fontFamily: "Baloo2-SemiBold" }}>
+                        {t("addRecipe.voice.understandTitle")}
+                      </ThemedText>
+                    </View>
+                  </View>
+
+                  <View className="flex-row items-center gap-2">
+                    <HugeiconsIcon
+                      icon={CheckmarkCircle01Icon}
+                      size={18}
+                      color={colors.success}
+                      strokeWidth={1.75}
+                    />
+                    <ThemedText variant="caption" color="secondary">
+                      {t("addRecipe.voice.worksOffline")}
+                    </ThemedText>
+                  </View>
                 </View>
-              </View>
+              )}
 
-              {/* ── AI Transcript Parsing ── */}
+              {/* ── Text fallback ── */}
               <View className="gap-3">
                 <View className="flex-row items-center gap-2">
                   <View className="h-px flex-1" style={{ backgroundColor: colors.outline }} />
@@ -841,15 +1006,12 @@ export default function AddRecipeScreen() {
                       placeholder={t("addRecipe.ai.pasteTranscript")}
                       placeholderTextColor={colors.textMuted}
                       value={voiceText}
-                      onChangeText={setVoiceText}
+                      onChangeText={(text) => {
+                        setVoiceText(text);
+                        if (voiceState !== "idle") resetVoice();
+                      }}
                       multiline
                     />
-
-                    {aiError ? (
-                      <ThemedText variant="caption" color="error">
-                        {aiError}
-                      </ThemedText>
-                    ) : null}
 
                     <ThemedButton
                       onPress={() => handleAIExtract(voiceText)}

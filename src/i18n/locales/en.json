@@ -179,7 +179,15 @@
       "subheading": "Try saying something like:",
       "sampleQuote": "Two tablespoons of fish sauce and half a kilo of pork belly",
       "understandTitle": "We'll understand and organize your ingredients and steps.",
-      "worksOffline": "Works offline"
+      "worksOffline": "Works offline",
+      "listening": "Listening",
+      "recording": "Recording...",
+      "processing": "Processing...",
+      "done": "Done",
+      "error": "Error",
+      "keepSpeaking": "Keep speaking — tap the red button when you're done.",
+      "transcriptPreview": "Transcript",
+      "transcriptEmpty": "Transcript will appear here as you speak..."
     }
   },
   "editRecipe": {

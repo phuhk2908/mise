@@ -179,7 +179,15 @@
       "subheading": "Thử nói như sau:",
       "sampleQuote": "Hai muỗng canh nước mắm và nửa ký thịt ba chỉ",
       "understandTitle": "Chúng tôi sẽ hiểu và sắp xếp nguyên liệu và các bước của bạn.",
-      "worksOffline": "Hoạt động ngoại tuyến"
+      "worksOffline": "Hoạt động ngoại tuyến",
+      "listening": "Đang nghe",
+      "recording": "Đang ghi...",
+      "processing": "Đang xử lý...",
+      "done": "Hoàn tất",
+      "error": "Lỗi",
+      "keepSpeaking": "Tiếp tục nói — nhấn nút đỏ khi bạn xong.",
+      "transcriptPreview": "Bản ghi",
+      "transcriptEmpty": "Bản ghi sẽ hiển thị ở đây khi bạn nói..."
     }
   },
   "editRecipe": {
