@@ -86,7 +86,7 @@ export default function ShoppingScreen() {
       generatedRef.current = true;
       generateFromRecipes({
         recipeServings: recipesData.map((r) => ({ recipeId: r.id as any, servings: r.servings })),
-        name: "All Recipes",
+        name: t("shopping.allRecipes"),
       });
     }
   }, [listData, recipesData, generateFromRecipes]);

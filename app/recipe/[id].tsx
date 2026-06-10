@@ -293,30 +293,36 @@ export default function RecipeDetailScreen() {
 
               {/* Meta row */}
               <View className="flex-row gap-3">
-                <View className="rounded-xl border px-4 py-3 gap-1"
-                  style={{ backgroundColor: colors.surface, borderColor: colors.outline }}
-                >
-                  <ThemedText variant="caption" color="muted">{t("common.prep")}</ThemedText>
-                  <ThemedText variant="bodySmall" style={{ fontFamily: "Baloo2-SemiBold" }}>
-                    {recipe.prepTime}
-                  </ThemedText>
-                </View>
-                <View className="rounded-xl border px-4 py-3 gap-1"
-                  style={{ backgroundColor: colors.surface, borderColor: colors.outline }}
-                >
-                  <ThemedText variant="caption" color="muted">{t("common.cook")}</ThemedText>
-                  <ThemedText variant="bodySmall" style={{ fontFamily: "Baloo2-SemiBold" }}>
-                    {recipe.cookTime}
-                  </ThemedText>
-                </View>
-                <View className="rounded-xl border px-4 py-3 gap-1"
-                  style={{ backgroundColor: colors.surface, borderColor: colors.outline }}
-                >
-                  <ThemedText variant="caption" color="muted">{t("common.serves")}</ThemedText>
-                  <ThemedText variant="bodySmall" style={{ fontFamily: "Baloo2-SemiBold" }}>
-                    {servings}
-                  </ThemedText>
-                </View>
+                {recipe.prepTime ? (
+                  <View className="rounded-xl border px-4 py-3 gap-1"
+                    style={{ backgroundColor: colors.surface, borderColor: colors.outline }}
+                  >
+                    <ThemedText variant="caption" color="muted">{t("common.prep")}</ThemedText>
+                    <ThemedText variant="bodySmall" style={{ fontFamily: "Baloo2-SemiBold" }}>
+                      {recipe.prepTime}
+                    </ThemedText>
+                  </View>
+                ) : null}
+                {recipe.cookTime ? (
+                  <View className="rounded-xl border px-4 py-3 gap-1"
+                    style={{ backgroundColor: colors.surface, borderColor: colors.outline }}
+                  >
+                    <ThemedText variant="caption" color="muted">{t("common.cook")}</ThemedText>
+                    <ThemedText variant="bodySmall" style={{ fontFamily: "Baloo2-SemiBold" }}>
+                      {recipe.cookTime}
+                    </ThemedText>
+                  </View>
+                ) : null}
+                {recipe.servings ? (
+                  <View className="rounded-xl border px-4 py-3 gap-1"
+                    style={{ backgroundColor: colors.surface, borderColor: colors.outline }}
+                  >
+                    <ThemedText variant="caption" color="muted">{t("common.serves")}</ThemedText>
+                    <ThemedText variant="bodySmall" style={{ fontFamily: "Baloo2-SemiBold" }}>
+                      {servings}
+                    </ThemedText>
+                  </View>
+                ) : null}
               </View>
 
               {/* Serving scaler */}

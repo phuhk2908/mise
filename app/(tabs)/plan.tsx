@@ -7,6 +7,8 @@ import {
   RefreshControl,
   Modal,
   TextInput,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
@@ -217,6 +219,10 @@ export default function PlanScreen() {
         <SafeAreaView
           style={{ flex: 1, backgroundColor: colors.background }}
         >
+          <KeyboardAvoidingView
+            behavior={Platform.OS === "ios" ? "padding" : undefined}
+            style={{ flex: 1 }}
+          >
           <View className="px-4 pt-4 pb-2 gap-4">
             {/* Modal header */}
             <View className="flex-row items-center justify-between">
@@ -335,12 +341,12 @@ export default function PlanScreen() {
                         {recipe.title}
                       </ThemedText>
                       <ThemedText variant="caption" color="secondary">
-                        {recipe.servings && recipe.prepTime
+                        {recipe.servings > 0 && recipe.prepTime
                           ? t("home.servingsPrep", {
                               servings: recipe.servings,
                               prepTime: recipe.prepTime,
                             })
-                          : recipe.servings
+                          : recipe.servings > 0
                           ? t("home.servingsOnly", {
                               servings: recipe.servings,
                             })
@@ -386,6 +392,7 @@ export default function PlanScreen() {
               </View>
             </ThemedButton>
           </View>
+          </KeyboardAvoidingView>
         </SafeAreaView>
       </Modal>
 

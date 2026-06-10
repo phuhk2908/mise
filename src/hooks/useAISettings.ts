@@ -11,7 +11,7 @@ export interface UseAISettingsReturn {
   testResult: { success: boolean; message: string } | null;
   save: (config: AIConfig) => Promise<void>;
   clear: () => Promise<void>;
-  testConnection: () => Promise<void>;
+  testConnection: (testConfig?: AIConfig) => Promise<void>;
   reload: () => Promise<void>;
 }
 
@@ -59,8 +59,9 @@ export function useAISettings(): UseAISettingsReturn {
     }
   }, []);
 
-  const testConnection = useCallback(async () => {
-    if (!config) {
+  const testConnection = useCallback(async (testConfig?: AIConfig) => {
+    const cfg = testConfig ?? config;
+    if (!cfg) {
       setTestResult({ success: false, message: "AI_NOT_CONFIGURED" });
       return;
     }
@@ -68,7 +69,7 @@ export function useAISettings(): UseAISettingsReturn {
     setIsTesting(true);
     setTestResult(null);
     try {
-      await listModels(config);
+      await listModels(cfg);
       setTestResult({ success: true, message: "TEST_SUCCESS" });
     } catch (err) {
       const code: AIErrorCode =

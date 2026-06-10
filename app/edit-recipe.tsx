@@ -145,7 +145,7 @@ export default function EditRecipeScreen() {
       });
       router.back();
     } catch (err) {
-      setSaveError(err instanceof Error ? err.message : "Failed to save recipe");
+      setSaveError(err instanceof Error ? err.message : t("editRecipe.saveError"));
     } finally {
       setSaving(false);
     }

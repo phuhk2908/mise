@@ -1,5 +1,5 @@
 /**
- * Orchestrator: extract a recipe draft from raw text or audio via the configured AI provider.
+ * Orchestrator: extract a recipe draft from raw text, image, or audio via the configured AI provider.
  */
 
 import { File } from "expo-file-system";
@@ -42,13 +42,6 @@ export async function extractRecipeFromAudioWithConfig(
   audioUri: string,
   config: AIConfig
 ): Promise<AIParsedRecipeDraft> {
-  if (config.provider === "ollama") {
-    throw new AIError(
-      "AUDIO_NOT_SUPPORTED",
-      "Ollama does not support audio input. Please paste recipe text in the Photo tab instead."
-    );
-  }
-
   // Read audio file as base64
   let audioBase64: string;
   try {
@@ -58,13 +51,12 @@ export async function extractRecipeFromAudioWithConfig(
     throw new AIError("READ_ERROR", "Failed to read audio file.");
   }
 
-  // TODO: Implement for providers that support audio (Gemini, GPT-4o, etc.)
-  // For now, only Ollama is supported and it does not accept audio input.
-  void audioBase64;
-  throw new AIError(
-    "AUDIO_NOT_SUPPORTED",
-    "Audio extraction is only available with providers that support audio input."
+  const prompt = buildRecipeExtractionPrompt(
+    "[User recorded audio describing a recipe. Extract the recipe details from the audio.]"
   );
+  const result = await generate(config, prompt, undefined, [audioBase64]);
+  const draft = parseRecipeResponse(result.response);
+  return draft;
 }
 
 export async function extractRecipeFromImage(imageUri: string): Promise<AIParsedRecipeDraft> {

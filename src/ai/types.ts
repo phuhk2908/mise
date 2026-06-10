@@ -45,7 +45,9 @@ export type AIErrorCode =
   | "INVALID_RESPONSE"
   | "NETWORK_ERROR"
   | "TIMEOUT"
-  | "UNKNOWN";
+  | "UNKNOWN"
+  | "AUDIO_NOT_SUPPORTED"
+  | "READ_ERROR";
 
 export class AIError extends Error {
   constructor(
