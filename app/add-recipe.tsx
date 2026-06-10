@@ -35,6 +35,9 @@ import {
 } from "../src/design-system";
 import { api } from "../convex/_generated/api";
 import type { Ingredient, Instruction } from "../src/types";
+import { useAISettings } from "../src/hooks/useAISettings";
+import { extractRecipeFromText } from "../src/ai/extract";
+import type { AIParsedRecipeDraft } from "../src/ai/types";
 
 type TabKey = "manual" | "photo" | "voice";
 
@@ -97,6 +100,13 @@ export default function AddRecipeScreen() {
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
+  // ── AI state ──
+  const { config: aiConfig, isLoaded: aiLoaded } = useAISettings();
+  const [photoText, setPhotoText] = useState("");
+  const [voiceText, setVoiceText] = useState("");
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState<string | null>(null);
+
   const addIngredient = () => {
     setIngredients((prev) => [
       ...prev,
@@ -134,6 +144,26 @@ export default function AddRecipeScreen() {
       const next = prev.filter((_, i) => i !== index);
       return next.map((s, i) => ({ ...s, stepNumber: i + 1 }));
     });
+  };
+
+  const handleAIExtract = async (sourceText: string) => {
+    if (!sourceText.trim()) return;
+
+    setAiLoading(true);
+    setAiError(null);
+    try {
+      const draft = await extractRecipeFromText(sourceText);
+      router.push({
+        pathname: "/ai-review",
+        params: { draft: JSON.stringify(draft) },
+      } as any);
+    } catch (err) {
+      const msg =
+        err instanceof Error ? err.message : t("aiErrors.unknown");
+      setAiError(msg);
+    } finally {
+      setAiLoading(false);
+    }
   };
 
   const handleSave = async () => {
@@ -615,6 +645,86 @@ export default function AddRecipeScreen() {
                   </View>
                 </View>
               </View>
+
+              {/* ── AI Text Extraction ── */}
+              <View className="gap-3">
+                <View className="flex-row items-center gap-2">
+                  <View className="h-px flex-1" style={{ backgroundColor: colors.outline }} />
+                  <ThemedText variant="caption" color="muted">
+                    OR
+                  </ThemedText>
+                  <View className="h-px flex-1" style={{ backgroundColor: colors.outline }} />
+                </View>
+
+                {!aiConfig && aiLoaded ? (
+                  <View
+                    className="rounded-2xl border px-4 py-4 gap-3"
+                    style={{ backgroundColor: colors.surface, borderColor: colors.outline }}
+                  >
+                    <ThemedText variant="bodySmall" style={{ fontFamily: "Baloo2-SemiBold" }}>
+                      {t("addRecipe.ai.notConfiguredTitle")}
+                    </ThemedText>
+                    <ThemedText variant="caption" color="secondary">
+                      {t("addRecipe.ai.notConfiguredDesc")}
+                    </ThemedText>
+                    <ThemedButton
+                      variant="secondary"
+                      onPress={() => router.push("/ai-settings" as any)}
+                    >
+                      {t("addRecipe.ai.openSettings")}
+                    </ThemedButton>
+                  </View>
+                ) : (
+                  <>
+                    <TextInput
+                      className="min-h-32 rounded-xl border px-4 py-3"
+                      style={{
+                        backgroundColor: colors.surface,
+                        borderColor: colors.outline,
+                        color: colors.textPrimary,
+                        fontFamily: "Baloo2-Regular",
+                        fontSize: 14,
+                        textAlignVertical: "top",
+                      }}
+                      placeholder={t("addRecipe.ai.pasteText")}
+                      placeholderTextColor={colors.textMuted}
+                      value={photoText}
+                      onChangeText={setPhotoText}
+                      multiline
+                    />
+
+                    {aiError ? (
+                      <ThemedText variant="caption" color="error">
+                        {aiError}
+                      </ThemedText>
+                    ) : null}
+
+                    <ThemedButton
+                      onPress={() => handleAIExtract(photoText)}
+                      disabled={!photoText.trim() || aiLoading}
+                      loading={aiLoading}
+                    >
+                      <View className="flex-row items-center gap-2">
+                        <HugeiconsIcon
+                          icon={SparklesIcon}
+                          size={18}
+                          color={isDark ? colors.neutral900! : colors.white}
+                          strokeWidth={1.75}
+                        />
+                        <ThemedText
+                          variant="bodySmall"
+                          style={{
+                            color: isDark ? colors.neutral900! : colors.white,
+                            fontFamily: "Baloo2-SemiBold",
+                          }}
+                        >
+                          {aiLoading ? t("addRecipe.ai.extracting") : t("addRecipe.ai.extractRecipe")}
+                        </ThemedText>
+                      </View>
+                    </ThemedButton>
+                  </>
+                )}
+              </View>
             </>
           )}
 
@@ -686,6 +796,86 @@ export default function AddRecipeScreen() {
                     {t("addRecipe.voice.worksOffline")}
                   </ThemedText>
                 </View>
+              </View>
+
+              {/* ── AI Transcript Parsing ── */}
+              <View className="gap-3">
+                <View className="flex-row items-center gap-2">
+                  <View className="h-px flex-1" style={{ backgroundColor: colors.outline }} />
+                  <ThemedText variant="caption" color="muted">
+                    OR
+                  </ThemedText>
+                  <View className="h-px flex-1" style={{ backgroundColor: colors.outline }} />
+                </View>
+
+                {!aiConfig && aiLoaded ? (
+                  <View
+                    className="rounded-2xl border px-4 py-4 gap-3"
+                    style={{ backgroundColor: colors.surface, borderColor: colors.outline }}
+                  >
+                    <ThemedText variant="bodySmall" style={{ fontFamily: "Baloo2-SemiBold" }}>
+                      {t("addRecipe.ai.notConfiguredTitle")}
+                    </ThemedText>
+                    <ThemedText variant="caption" color="secondary">
+                      {t("addRecipe.ai.notConfiguredDesc")}
+                    </ThemedText>
+                    <ThemedButton
+                      variant="secondary"
+                      onPress={() => router.push("/ai-settings" as any)}
+                    >
+                      {t("addRecipe.ai.openSettings")}
+                    </ThemedButton>
+                  </View>
+                ) : (
+                  <>
+                    <TextInput
+                      className="min-h-32 rounded-xl border px-4 py-3"
+                      style={{
+                        backgroundColor: colors.surface,
+                        borderColor: colors.outline,
+                        color: colors.textPrimary,
+                        fontFamily: "Baloo2-Regular",
+                        fontSize: 14,
+                        textAlignVertical: "top",
+                      }}
+                      placeholder={t("addRecipe.ai.pasteTranscript")}
+                      placeholderTextColor={colors.textMuted}
+                      value={voiceText}
+                      onChangeText={setVoiceText}
+                      multiline
+                    />
+
+                    {aiError ? (
+                      <ThemedText variant="caption" color="error">
+                        {aiError}
+                      </ThemedText>
+                    ) : null}
+
+                    <ThemedButton
+                      onPress={() => handleAIExtract(voiceText)}
+                      disabled={!voiceText.trim() || aiLoading}
+                      loading={aiLoading}
+                    >
+                      <View className="flex-row items-center gap-2">
+                        <HugeiconsIcon
+                          icon={SparklesIcon}
+                          size={18}
+                          color={isDark ? colors.neutral900! : colors.white}
+                          strokeWidth={1.75}
+                        />
+                        <ThemedText
+                          variant="bodySmall"
+                          style={{
+                            color: isDark ? colors.neutral900! : colors.white,
+                            fontFamily: "Baloo2-SemiBold",
+                          }}
+                        >
+                          {aiLoading ? t("addRecipe.ai.extracting") : t("addRecipe.ai.parseTranscript")}
+                        </ThemedText>
+                      </View>
+                    </ThemedButton>
+                  </>
+                )}
               </View>
             </>
           )}

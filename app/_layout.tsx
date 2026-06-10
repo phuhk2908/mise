@@ -69,6 +69,14 @@ function ThemedStack() {
           name="data-safety"
           options={{ presentation: "card" }}
         />
+        <Stack.Screen
+          name="ai-settings"
+          options={{ presentation: "card" }}
+        />
+        <Stack.Screen
+          name="ai-review"
+          options={{ presentation: "card" }}
+        />
       </Stack>
     </View>
   );

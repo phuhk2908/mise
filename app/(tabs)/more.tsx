@@ -24,6 +24,7 @@ import {
   File01Icon,
   Shield02Icon,
   LockIcon,
+  SparklesIcon,
 } from "@hugeicons/core-free-icons";
 import { api } from "../../convex/_generated/api";
 import { useTranslation } from "react-i18next";
@@ -174,6 +175,37 @@ export default function MoreScreen() {
               </View>
             </View>
           </View>
+
+          {/* AI Settings */}
+          <Pressable
+            onPress={() => router.push("/ai-settings" as any)}
+            className="rounded-2xl border overflow-hidden flex-row items-center gap-3 px-4 py-3"
+            style={{
+              backgroundColor: colors.surface,
+              borderColor: colors.outline,
+            }}
+          >
+            <HugeiconsIcon
+              icon={SparklesIcon}
+              size={20}
+              color={colors.primary}
+              strokeWidth={1.75}
+            />
+            <View className="flex-1">
+              <ThemedText variant="body" style={{ fontFamily: "Baloo2-SemiBold" }}>
+                {t("more.aiSettings")}
+              </ThemedText>
+              <ThemedText variant="caption" color="secondary">
+                {t("more.aiSettingsDesc")}
+              </ThemedText>
+            </View>
+            <HugeiconsIcon
+              icon={ArrowRight01Icon}
+              size={18}
+              color={colors.textMuted}
+              strokeWidth={1.75}
+            />
+          </Pressable>
 
           {/* Appearance */}
           <View

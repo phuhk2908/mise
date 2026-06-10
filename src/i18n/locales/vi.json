@@ -209,6 +209,8 @@
   "more": {
     "title": "Thêm",
     "preferences": "Tùy chỉnh",
+    "aiSettings": "Cài đặt AI",
+    "aiSettingsDesc": "Cấu hình nhà cung cấp AI để trích xuất công thức",
     "language": "Ngôn ngữ",
     "languageDesc": "Chọn ngôn ngữ hiển thị",
     "vietnamese": "Tiếng Việt",
@@ -242,6 +244,55 @@
     "create": "Tạo \"{{unit}}\"",
     "noResults": "Không tìm thấy đơn vị",
     "placeholder": "Đơn vị"
+  },
+  "aiSettings": {
+    "title": "Cài đặt AI",
+    "connectTitle": "Kết nối nhà cung cấp AI",
+    "connectDesc": "Mise sử dụng AI để hỗ trợ trích xuất công thức từ văn bản hoặc giọng nói. Khóa API của bạn được lưu trên thiết bị và không được gửi đến máy chủ Mise.",
+    "provider": "Nhà cung cấp",
+    "model": "Mô hình",
+    "modelPlaceholder": "ví dụ: gemma3",
+    "baseUrl": "URL máy chủ",
+    "baseUrlPlaceholder": "http://localhost:11434",
+    "apiKey": "Khóa API",
+    "apiKeyPlaceholder": "Nhập khóa API của bạn",
+    "apiKeyHint": "Khóa của bạn được lưu cục bộ và không bao giờ gửi đến máy chủ Mise.",
+    "testConnection": "Kiểm tra kết nối",
+    "testSuccess": "Kết nối thành công.",
+    "testNotConfigured": "Vui lòng điền đầy đủ thông tin trước.",
+    "save": "Lưu cài đặt",
+    "clear": "Xóa cài đặt"
+  },
+  "aiErrors": {
+    "notConfigured": "Chưa cấu hình nhà cung cấp AI.",
+    "invalidKey": "Không thể kết nối. Vui lòng kiểm tra khóa API.",
+    "invalidModel": "Mô hình được chọn không khả dụng. Vui lòng kiểm tra tên mô hình.",
+    "invalidResponse": "AI trả về kết quả không hợp lệ. Vui lòng thử lại.",
+    "networkError": "Không thể kết nối đến nhà cung cấp AI. Vui lòng kiểm tra URL máy chủ.",
+    "timeout": "Kết nối hết thời gian. Vui lòng kiểm tra URL máy chủ.",
+    "unknown": "Đã xảy ra lỗi không mong muốn. Vui lòng thử lại."
+  },
+  "aiReview": {
+    "title": "Xem lại công thức",
+    "lowConfidenceTitle": "Xem lại kỹ",
+    "lowConfidenceDesc": "Mise không hoàn toàn tự tin về công thức này. Vui lòng xem lại trước khi lưu.",
+    "warningsTitle": "Cảnh báo",
+    "extractedFrom": "Trích xuất từ văn bản",
+    "saveRecipe": "Lưu công thức",
+    "discard": "Hủy",
+    "discardConfirmTitle": "Hủy bản nháp?",
+    "discardConfirmDesc": "Bản nháp công thức này sẽ bị mất.",
+    "categoryPlaceholder": "Thêm danh mục"
+  },
+  "addRecipe.ai": {
+    "notConfiguredTitle": "Chưa cấu hình nhà cung cấp AI.",
+    "notConfiguredDesc": "Để sử dụng tính năng AI, hãy chọn nhà cung cấp và nhập khóa API.",
+    "openSettings": "Mở Cài đặt AI",
+    "pasteText": "Dán văn bản công thức vào đây...",
+    "pasteTranscript": "Dán bản ghi của bạn vào đây...",
+    "extractRecipe": "Trích xuất công thức",
+    "parseTranscript": "Phân tích bản ghi",
+    "extracting": "Đang trích xuất..."
   },
   "dialogs": {
     "resetTitle": "Xóa toàn bộ dữ liệu",
