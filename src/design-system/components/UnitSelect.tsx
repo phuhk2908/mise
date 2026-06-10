@@ -9,6 +9,7 @@ import {
   type ViewStyle,
   type TextStyle,
 } from "react-native";
+import { useTranslation } from "react-i18next";
 import { ThemedText } from "./ThemedText";
 import { useAppTheme } from "../theme/useAppTheme";
 
@@ -63,6 +64,7 @@ type UnitPickerModalProps = {
 };
 
 function UnitPickerModal({ visible, selected, onSelect, onClose }: UnitPickerModalProps) {
+  const { t } = useTranslation();
   const { colors, isDark } = useAppTheme();
   const [query, setQuery] = useState(selected);
   const [customOptions, setCustomOptions] = useState<string[]>([]);
@@ -145,14 +147,14 @@ function UnitPickerModal({ visible, selected, onSelect, onClose }: UnitPickerMod
               }}
             >
               <ThemedText variant="body" style={{ fontFamily: "Baloo2-SemiBold" }}>
-                Select Unit
+                {t("unitSelect.title")}
               </ThemedText>
               <Pressable onPress={onClose} hitSlop={8}>
                 <ThemedText
                   variant="body"
                   style={{ color: colors.primary, fontFamily: "Baloo2-SemiBold" }}
                 >
-                  Cancel
+                  {t("unitSelect.cancel")}
                 </ThemedText>
               </Pressable>
             </View>
@@ -162,7 +164,7 @@ function UnitPickerModal({ visible, selected, onSelect, onClose }: UnitPickerMod
               <TextInput
                 value={query}
                 onChangeText={setQuery}
-                placeholder="Search or type a unit…"
+                placeholder={t("unitSelect.searchPlaceholder")}
                 placeholderTextColor={colors.textMuted}
                 autoFocus
                 className="rounded-xl border px-3 py-2"
@@ -231,7 +233,7 @@ function UnitPickerModal({ visible, selected, onSelect, onClose }: UnitPickerMod
                       color: colors.primary,
                     }}
                   >
-                    Create "{query.trim()}"
+                    {t("unitSelect.create", { unit: query.trim() })}
                   </ThemedText>
                 </Pressable>
               )}
@@ -239,7 +241,7 @@ function UnitPickerModal({ visible, selected, onSelect, onClose }: UnitPickerMod
               {filtered.length === 0 && !isNew && (
                 <View className="px-4 py-4">
                   <ThemedText variant="caption" color="muted">
-                    No units found
+                    {t("unitSelect.noResults")}
                   </ThemedText>
                 </View>
               )}
@@ -264,9 +266,11 @@ export function UnitSelect({
   onChange,
   style,
   inputStyle,
-  placeholder = "Unit",
+  placeholder,
 }: UnitSelectProps) {
+  const { t } = useTranslation();
   const { colors } = useAppTheme();
+  const resolvedPlaceholder = placeholder ?? t("unitSelect.placeholder");
   const [open, setOpen] = useState(false);
 
   return (
@@ -294,7 +298,7 @@ export function UnitSelect({
             inputStyle,
           ]}
         >
-          {value || placeholder}
+          {value || resolvedPlaceholder}
         </ThemedText>
       </Pressable>
 

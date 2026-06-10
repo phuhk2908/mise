@@ -76,7 +76,7 @@
     "generateList": "Tạo danh sách mua sắm",
     "noMealsHint": "Nhấn biểu tượng + trong lưới để thêm bữa ăn trước.",
     "helpTitle": "Lập kế hoạch bữa ăn",
-    "helpDesc": "Nhấn + ở ô bất kỳ để gán công thức. Nhấn thẻ công thức để xóa.",
+    "helpDesc": "Nhấn + ở ô bất kỳ để gán công thức. Nhấn biểu tượng thùng rác trên thẻ công thức để xóa.",
     "mealTypes": {
       "breakfast": "Sáng",
       "lunch": "Trưa",
@@ -92,7 +92,15 @@
       "sat": "T7",
       "sun": "CN"
     },
-    "mealServings": "{{servings}} phần ăn"
+    "mealServings": "{{servings}} phần ăn",
+    "addMealTitle": "Thêm {{meal}} · {{day}}",
+    "addMeal": "Thêm bữa ăn",
+    "searchRecipe": "Tìm công thức...",
+    "servings": "Khẩu phần",
+    "noRecipes": "Không có công thức.",
+    "addToPlan": "Thêm vào thực đơn",
+    "deleteMealTitle": "Xóa bữa ăn",
+    "deleteMealDesc": "Xóa bữa ăn này khỏi thực đơn?"
   },
   "shopping": {
     "title": "Danh sách mua sắm",
@@ -226,6 +234,14 @@
     "build": "Bản dựng",
     "expoSdk": "Expo SDK",
     "currentTheme": "Chế độ hiện tại"
+  },
+  "unitSelect": {
+    "title": "Chọn đơn vị",
+    "cancel": "Hủy",
+    "searchPlaceholder": "Tìm hoặc nhập đơn vị…",
+    "create": "Tạo \"{{unit}}\"",
+    "noResults": "Không tìm thấy đơn vị",
+    "placeholder": "Đơn vị"
   },
   "dialogs": {
     "resetTitle": "Xóa toàn bộ dữ liệu",

@@ -76,7 +76,7 @@
     "generateList": "Generate Shopping List",
     "noMealsHint": "Tap the + icons in the grid to add meals first.",
     "helpTitle": "Meal planning",
-    "helpDesc": "Tap + on any slot to assign a recipe. Tap the recipe card to remove it.",
+    "helpDesc": "Tap + on any slot to assign a recipe. Tap the trash icon on a recipe card to remove it.",
     "mealTypes": {
       "breakfast": "Breakfast",
       "lunch": "Lunch",
@@ -92,7 +92,15 @@
       "sat": "Sat",
       "sun": "Sun"
     },
-    "mealServings": "{{servings}} servings"
+    "mealServings": "{{servings}} servings",
+    "addMealTitle": "Add {{meal}} · {{day}}",
+    "addMeal": "Add Meal",
+    "searchRecipe": "Search recipes...",
+    "servings": "Servings",
+    "noRecipes": "No recipes available.",
+    "addToPlan": "Add to Plan",
+    "deleteMealTitle": "Remove Meal",
+    "deleteMealDesc": "Remove this meal from your plan?"
   },
   "shopping": {
     "title": "Shopping List",
@@ -226,6 +234,14 @@
     "build": "Build",
     "expoSdk": "Expo SDK",
     "currentTheme": "Current theme"
+  },
+  "unitSelect": {
+    "title": "Select Unit",
+    "cancel": "Cancel",
+    "searchPlaceholder": "Search or type a unit…",
+    "create": "Create \"{{unit}}\"",
+    "noResults": "No units found",
+    "placeholder": "Unit"
   },
   "dialogs": {
     "resetTitle": "Delete All Data",

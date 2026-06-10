@@ -130,7 +130,7 @@ export default function RecipesScreen() {
                         </ThemedText>
                         <View className="flex-row items-center gap-1 mt-1">
                           <ThemedText variant="caption" color="secondary">
-                            {recipe.servings} servings
+                            {t("home.servingsOnly", { servings: recipe.servings })}
                           </ThemedText>
                           <View className="h-1 w-1 rounded-full" style={{ backgroundColor: colors.textMuted }} />
                           <View className="flex-row items-center gap-1">
