@@ -172,22 +172,26 @@
       "takePhoto": "Take Photo",
       "chooseGallery": "Choose from Gallery",
       "tipsTitle": "Tips for best results",
-      "tipsDesc": "Good lighting, minimal shadows, and a clear view work best."
+      "tipsDesc": "Good lighting, minimal shadows, and a clear view work best.",
+      "or": "OR",
+      "imageSelected": "Image selected",
+      "removeImage": "Remove",
+      "cameraPermissionRequired": "Camera permission is required to take photos.",
+      "galleryPermissionRequired": "Photo library permission is required to choose images.",
+      "extractFromImage": "Extract Recipe from Image"
     },
     "voice": {
-      "heading": "Tap to start speaking",
-      "subheading": "Try saying something like:",
+      "heading": "Tap to record",
+      "subheading": "Record a voice note of your recipe and we'll extract it with AI.",
       "sampleQuote": "Two tablespoons of fish sauce and half a kilo of pork belly",
-      "understandTitle": "We'll understand and organize your ingredients and steps.",
-      "worksOffline": "Works offline",
-      "listening": "Listening",
+      "understandTitle": "We'll extract ingredients and steps from your recording.",
+      "listening": "Recording",
       "recording": "Recording...",
       "processing": "Processing...",
-      "done": "Done",
+      "done": "Recording saved",
       "error": "Error",
-      "keepSpeaking": "Keep speaking — tap the red button when you're done.",
-      "transcriptPreview": "Transcript",
-      "transcriptEmpty": "Transcript will appear here as you speak..."
+      "keepSpeaking": "Tap the button when you're done.",
+      "recordingSaved": "Recording saved"
     }
   },
   "editRecipe": {
@@ -260,6 +264,10 @@
     "provider": "Provider",
     "model": "Model",
     "modelPlaceholder": "e.g. gemma3",
+    "selectModelTitle": "Select Model",
+    "searchModelPlaceholder": "Search or type a model…",
+    "createModel": "Use \"{{model}}\"",
+    "noModelsFound": "No models found",
     "baseUrl": "Server URL",
     "baseUrlPlaceholder": "http://localhost:11434",
     "apiKey": "API Key",
@@ -280,6 +288,8 @@
     "invalidResponse": "AI returned an invalid result. Please try again.",
     "networkError": "Could not connect to AI Provider. Please check your server URL.",
     "timeout": "Connection timed out. Please check your server URL.",
+    "audioNotSupported": "This AI provider does not support audio input. Please use text input instead.",
+    "visionNotSupported": "This model does not support image input. Try a vision-capable model like llava, moondream, or llama3.2-vision.",
     "unknown": "An unexpected error occurred. Please try again."
   },
   "aiReview": {
@@ -302,6 +312,7 @@
     "pasteTranscript": "Paste your transcript here...",
     "extractRecipe": "Extract Recipe",
     "parseTranscript": "Parse Transcript",
+    "sendToAI": "Send to AI",
     "extracting": "Extracting..."
   },
   "dialogs": {

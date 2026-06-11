@@ -1,12 +1,15 @@
 /**
- * React hook for speech-to-text recording using expo-speech-recognition.
+ * React hook for audio recording using expo-audio.
  */
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import {
-  ExpoSpeechRecognitionModule,
-  useSpeechRecognitionEvent,
-} from "expo-speech-recognition";
+  AudioModule,
+  RecordingPresets,
+  setAudioModeAsync,
+  useAudioRecorder,
+  useAudioRecorderState,
+} from "expo-audio";
 
 export type RecordingState =
   | "idle"
@@ -18,41 +21,48 @@ export type RecordingState =
 
 export interface UseVoiceRecordingReturn {
   state: RecordingState;
-  transcript: string;
+  uri: string | null;
+  duration: number;
   error: string | null;
   isSupported: boolean;
   hasPermission: boolean;
   startRecording: () => Promise<void>;
-  stopRecording: () => void;
+  stopRecording: () => Promise<void>;
   reset: () => void;
 }
 
 export function useVoiceRecording(): UseVoiceRecordingReturn {
   const [state, setState] = useState<RecordingState>("idle");
-  const [transcript, setTranscript] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [hasPermission, setHasPermission] = useState(false);
   const [isSupported, setIsSupported] = useState(true);
-  const interimRef = useRef("");
+  const [duration, setDuration] = useState(0);
+  const [uri, setUri] = useState<string | null>(null);
 
-  // Check support and permission on mount
+  const audioRecorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
+  const recorderState = useAudioRecorderState(audioRecorder);
+
+  const durationIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Configure audio mode and request permissions on mount
   useEffect(() => {
     let mounted = true;
     (async () => {
       try {
-        const available = ExpoSpeechRecognitionModule.isRecognitionAvailable();
+        await setAudioModeAsync({
+          playsInSilentMode: true,
+          allowsRecording: true,
+        });
+        const status = await AudioModule.requestRecordingPermissionsAsync();
         if (!mounted) return;
-        setIsSupported(available);
-        if (!available) {
-          setError("Speech recognition is not available on this device.");
-          return;
+        setHasPermission(status.granted);
+        if (!status.granted) {
+          setError("Microphone permission is required to record audio.");
         }
-
-        const perms = await ExpoSpeechRecognitionModule.getPermissionsAsync();
-        if (!mounted) return;
-        setHasPermission(perms.granted);
       } catch {
-        // ignore
+        if (!mounted) return;
+        setError("Failed to configure audio recording.");
+        setIsSupported(false);
       }
     })();
     return () => {
@@ -60,110 +70,77 @@ export function useVoiceRecording(): UseVoiceRecordingReturn {
     };
   }, []);
 
-  // Event listeners
-  useSpeechRecognitionEvent("start", () => {
-    setState("recording");
-    setError(null);
-  });
-
-  useSpeechRecognitionEvent("result", (event) => {
-    const results = event.results;
-    if (results.length > 0) {
-      const top = results[0];
-      if (event.isFinal) {
-        setTranscript((prev) => {
-          const separator = prev && !prev.endsWith(" ") ? " " : "";
-          return prev + separator + top.transcript;
-        });
-        interimRef.current = "";
-      } else {
-        interimRef.current = top.transcript;
+  // Track recording duration
+  useEffect(() => {
+    if (recorderState?.isRecording) {
+      durationIntervalRef.current = setInterval(() => {
+        setDuration((d) => d + 1);
+      }, 1000);
+    } else {
+      if (durationIntervalRef.current) {
+        clearInterval(durationIntervalRef.current);
+        durationIntervalRef.current = null;
       }
     }
-  });
-
-  useSpeechRecognitionEvent("error", (event) => {
-    if (event.error === "aborted") {
-      // User manually cancelled — not an error
-      return;
-    }
-    setError(event.message);
-    setState("error");
-  });
-
-  useSpeechRecognitionEvent("end", () => {
-    setState((current) => {
-      if (current === "recording" || current === "processing") {
-        return "done";
+    return () => {
+      if (durationIntervalRef.current) {
+        clearInterval(durationIntervalRef.current);
+        durationIntervalRef.current = null;
       }
-      return current;
-    });
-  });
+    };
+  }, [recorderState?.isRecording]);
 
   const startRecording = useCallback(async () => {
     setError(null);
-    setTranscript("");
-    interimRef.current = "";
+    setUri(null);
+    setDuration(0);
 
-    // Ensure permissions
     if (!hasPermission) {
-      setState("requesting");
-      try {
-        const perms =
-          await ExpoSpeechRecognitionModule.requestPermissionsAsync();
-        setHasPermission(perms.granted);
-        if (!perms.granted) {
-          setError(
-            "Microphone and speech recognition permissions are required to record voice."
-          );
-          setState("error");
-          return;
-        }
-      } catch {
-        setError("Failed to request microphone permission.");
-        setState("error");
-        return;
-      }
+      setError("Microphone permission is required to record audio.");
+      setState("error");
+      return;
     }
 
     try {
-      ExpoSpeechRecognitionModule.start({
-        lang: "en-US",
-        interimResults: true,
-        continuous: true,
-        addsPunctuation: true,
-      });
+      setState("requesting");
+      await audioRecorder.prepareToRecordAsync();
+      audioRecorder.record();
       setState("recording");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to start recording.");
       setState("error");
     }
-  }, [hasPermission]);
+  }, [hasPermission, audioRecorder]);
 
-  const stopRecording = useCallback(() => {
+  const stopRecording = useCallback(async () => {
     try {
       setState("processing");
-      ExpoSpeechRecognitionModule.stop();
-    } catch {
-      setState("done");
+      await audioRecorder.stop();
+      const recordingUri = (audioRecorder as any).uri as string | undefined;
+      if (recordingUri) {
+        setUri(recordingUri);
+        setState("done");
+      } else {
+        setError("Recording did not produce a file.");
+        setState("error");
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to stop recording.");
+      setState("error");
     }
-  }, []);
+  }, [audioRecorder]);
 
   const reset = useCallback(() => {
-    try {
-      ExpoSpeechRecognitionModule.abort();
-    } catch {
-      // ignore
-    }
     setState("idle");
-    setTranscript("");
+    setUri(null);
+    setDuration(0);
     setError(null);
-    interimRef.current = "";
   }, []);
 
   return {
     state,
-    transcript: transcript + (interimRef.current ? " " + interimRef.current : ""),
+    uri,
+    duration,
     error,
     isSupported,
     hasPermission,

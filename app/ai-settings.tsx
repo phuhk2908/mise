@@ -5,6 +5,8 @@ import {
   Pressable,
   TextInput as RNTextInput,
   ActivityIndicator,
+  Platform,
+  KeyboardAvoidingView,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
@@ -23,6 +25,7 @@ import {
   ThemedText,
   ThemedButton,
   Input,
+  Select,
   useAppTheme,
 } from "../src/design-system";
 import { useAISettings } from "../src/hooks/useAISettings";
@@ -116,10 +119,16 @@ export default function AISettingsScreen() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
-      <ScrollView
-        className="flex-1"
-        contentContainerClassName="px-4 pt-4 pb-8 gap-5"
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={{ flex: 1 }}
       >
+        <ScrollView
+          className="flex-1"
+          contentContainerClassName="px-4 pt-4 pb-8 gap-5"
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
+        >
         {/* Header */}
         <View className="flex-row items-center gap-3">
           <Pressable
@@ -203,78 +212,26 @@ export default function AISettingsScreen() {
           </View>
 
           {/* Model */}
-          <View className="gap-2">
-            <ThemedText variant="caption" color="secondary">
-              {t("aiSettings.model")}
-            </ThemedText>
-            <RNTextInput
-              className="min-h-11 rounded-xl border px-3"
-              style={{
-                borderColor: colors.outline,
-                backgroundColor: colors.surface,
-                color: colors.textPrimary,
-                fontFamily: "Baloo2-Regular",
-                fontSize: 14,
-                lineHeight: 20,
-                height: 44,
-              }}
+          {fetchingModels ? (
+            <View className="flex-row items-center gap-2 py-1">
+              <ActivityIndicator size="small" color={colors.primary} />
+              <ThemedText variant="caption" color="muted">
+                {t("aiSettings.fetchingModels")}
+              </ThemedText>
+            </View>
+          ) : (
+            <Select
+              label={t("aiSettings.model")}
               placeholder={t("aiSettings.modelPlaceholder")}
-              placeholderTextColor={colors.textMuted}
+              options={availableModels}
               value={model}
-              onChangeText={setModel}
-              autoCapitalize="none"
+              onChange={setModel}
+              modalTitle={t("aiSettings.selectModelTitle")}
+              searchPlaceholder={t("aiSettings.searchModelPlaceholder")}
+              createLabel={(q) => t("aiSettings.createModel", { model: q })}
+              noResultsLabel={t("aiSettings.noModelsFound")}
             />
-
-            {/* Public model suggestions */}
-            {fetchingModels ? (
-              <View className="flex-row items-center gap-2 py-1">
-                <ActivityIndicator size="small" color={colors.primary} />
-                <ThemedText variant="caption" color="muted">
-                  {t("aiSettings.fetchingModels")}
-                </ThemedText>
-              </View>
-            ) : availableModels.length > 0 ? (
-              <View className="gap-2">
-                <ThemedText variant="caption" color="muted">
-                  {t("aiSettings.popularModels")}
-                </ThemedText>
-                <View className="flex-row flex-wrap gap-2">
-                  {availableModels.slice(0, 20).map((m) => {
-                    const active = model === m;
-                    return (
-                      <Pressable
-                        key={m}
-                        onPress={() => setModel(m)}
-                        className="rounded-full border px-3 py-1.5"
-                        style={{
-                          backgroundColor: active
-                            ? colors.primary + "15"
-                            : colors.surface,
-                          borderColor: active
-                            ? colors.primary
-                            : colors.outline,
-                        }}
-                      >
-                        <ThemedText
-                          variant="caption"
-                          style={{
-                            color: active
-                              ? colors.primary
-                              : colors.textSecondary,
-                            fontFamily: active
-                              ? "Baloo2-SemiBold"
-                              : "Baloo2-Regular",
-                          }}
-                        >
-                          {m}
-                        </ThemedText>
-                      </Pressable>
-                    );
-                  })}
-                </View>
-              </View>
-            ) : null}
-          </View>
+          )}
 
           {/* Base URL */}
           <Input
@@ -366,6 +323,8 @@ export default function AISettingsScreen() {
                 ? t("aiErrors.networkError")
                 : testResult.message === "TIMEOUT"
                 ? t("aiErrors.timeout")
+                : testResult.message === "VISION_NOT_SUPPORTED"
+                ? t("aiErrors.visionNotSupported")
                 : t("aiErrors.unknown")}
             </ThemedText>
           </View>
@@ -375,7 +334,14 @@ export default function AISettingsScreen() {
         <View className="gap-3">
           <ThemedButton
             variant="secondary"
-            onPress={testConnection}
+            onPress={() =>
+              testConnection({
+                provider,
+                model: model.trim(),
+                baseUrl: baseUrl.trim(),
+                apiKey: apiKey.trim(),
+              })
+            }
             disabled={isTesting || !isFormValid}
             loading={isTesting}
           >
@@ -413,7 +379,8 @@ export default function AISettingsScreen() {
             </ThemedButton>
           )}
         </View>
-      </ScrollView>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }

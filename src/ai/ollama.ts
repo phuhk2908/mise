@@ -31,9 +31,22 @@ export interface GenerateResponse {
 
 export async function generate(
   config: AIConfig,
-  prompt: string
+  prompt: string,
+  images?: string[]
 ): Promise<GenerateResponse> {
   const url = `${config.baseUrl.replace(/\/$/, "")}/api/generate`;
+
+  const body: Record<string, unknown> = {
+    model: config.model,
+    prompt,
+    stream: false,
+  };
+
+  if (images && images.length > 0) {
+    body.images = images;
+  } else {
+    body.format = "json";
+  }
 
   try {
     const response = await fetchWithTimeout(
@@ -44,27 +57,34 @@ export async function generate(
           "Content-Type": "application/json",
           ...(config.apiKey ? { Authorization: `Bearer ${config.apiKey}` } : {}),
         },
-        body: JSON.stringify({
-          model: config.model,
-          prompt,
-          stream: false,
-          format: "json",
-        }),
+        body: JSON.stringify(body),
       },
       REQUEST_TIMEOUT_MS
     );
 
     if (!response.ok) {
+      const errorBody = await response.text();
+      if (errorBody.toLowerCase().includes("image") && errorBody.toLowerCase().includes("not support")) {
+        throw new AIError("VISION_NOT_SUPPORTED", `Model "${config.model}" does not support image input. Try a vision-capable model like llava, moondream, or llama3.2-vision.`);
+      }
       if (response.status === 401 || response.status === 403) {
         throw new AIError("INVALID_KEY", `HTTP ${response.status}`);
       }
       if (response.status === 404) {
         throw new AIError("INVALID_MODEL", `HTTP ${response.status} — model may not be available`);
       }
-      throw new AIError("NETWORK_ERROR", `HTTP ${response.status}`);
+      throw new AIError("NETWORK_ERROR", `HTTP ${response.status}: ${errorBody.slice(0, 200)}`);
     }
 
     const data = await response.json();
+
+    if (data.error) {
+      const errMsg = String(data.error).toLowerCase();
+      if (errMsg.includes("image") && (errMsg.includes("not support") || errMsg.includes("vision"))) {
+        throw new AIError("VISION_NOT_SUPPORTED", `Model "${config.model}" does not support image input. Try a vision-capable model like llava, moondream, or llama3.2-vision.`);
+      }
+      throw new AIError("NETWORK_ERROR", String(data.error));
+    }
 
     if (!data.response || typeof data.response !== "string") {
       throw new AIError("INVALID_RESPONSE", "Missing response field from Ollama");

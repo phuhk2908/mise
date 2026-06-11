@@ -172,22 +172,26 @@
       "takePhoto": "Chụp ảnh",
       "chooseGallery": "Chọn từ thư viện",
       "tipsTitle": "Mẹo để kết quả tốt nhất",
-      "tipsDesc": "Ánh sáng tốt, ít bóng tối và góc nhìn rõ ràng sẽ cho kết quả tốt nhất."
+      "tipsDesc": "Ánh sáng tốt, ít bóng tối và góc nhìn rõ ràng sẽ cho kết quả tốt nhất.",
+      "or": "HOẶC",
+      "imageSelected": "Đã chọn ảnh",
+      "removeImage": "Xóa",
+      "cameraPermissionRequired": "Cần quyền truy cập camera để chụp ảnh.",
+      "galleryPermissionRequired": "Cần quyền truy cập thư viện ảnh để chọn ảnh.",
+      "extractFromImage": "Trích xuất công thức từ ảnh"
     },
     "voice": {
-      "heading": "Nhấn để bắt đầu nói",
-      "subheading": "Thử nói như sau:",
+      "heading": "Nhấn để ghi âm",
+      "subheading": "Ghi âm ghi chú công thức của bạn và chúng tôi sẽ trích xuất bằng AI.",
       "sampleQuote": "Hai muỗng canh nước mắm và nửa ký thịt ba chỉ",
-      "understandTitle": "Chúng tôi sẽ hiểu và sắp xếp nguyên liệu và các bước của bạn.",
-      "worksOffline": "Hoạt động ngoại tuyến",
-      "listening": "Đang nghe",
+      "understandTitle": "Chúng tôi sẽ trích xuất nguyên liệu và các bước từ bản ghi của bạn.",
+      "listening": "Đang ghi",
       "recording": "Đang ghi...",
       "processing": "Đang xử lý...",
-      "done": "Hoàn tất",
+      "done": "Đã lưu bản ghi",
       "error": "Lỗi",
-      "keepSpeaking": "Tiếp tục nói — nhấn nút đỏ khi bạn xong.",
-      "transcriptPreview": "Bản ghi",
-      "transcriptEmpty": "Bản ghi sẽ hiển thị ở đây khi bạn nói..."
+      "keepSpeaking": "Nhấn nút khi bạn xong.",
+      "recordingSaved": "Đã lưu bản ghi"
     }
   },
   "editRecipe": {
@@ -260,6 +264,10 @@
     "provider": "Nhà cung cấp",
     "model": "Mô hình",
     "modelPlaceholder": "ví dụ: gemma3",
+    "selectModelTitle": "Chọn mô hình",
+    "searchModelPlaceholder": "Tìm hoặc nhập tên mô hình…",
+    "createModel": "Sử dụng \"{{model}}\"",
+    "noModelsFound": "Không tìm thấy mô hình",
     "baseUrl": "URL máy chủ",
     "baseUrlPlaceholder": "http://localhost:11434",
     "apiKey": "Khóa API",
@@ -280,6 +288,8 @@
     "invalidResponse": "AI trả về kết quả không hợp lệ. Vui lòng thử lại.",
     "networkError": "Không thể kết nối đến nhà cung cấp AI. Vui lòng kiểm tra URL máy chủ.",
     "timeout": "Kết nối hết thời gian. Vui lòng kiểm tra URL máy chủ.",
+    "audioNotSupported": "Nhà cung cấp AI này không hỗ trợ đầu vào âm thanh. Vui lòng sử dụng đầu vào văn bản thay thế.",
+    "visionNotSupported": "Mô hình này không hỗ trợ đầu vào hình ảnh. Hãy thử mô hình hỗ trợ vision như llava, moondream hoặc llama3.2-vision.",
     "unknown": "Đã xảy ra lỗi không mong muốn. Vui lòng thử lại."
   },
   "aiReview": {
@@ -302,6 +312,7 @@
     "pasteTranscript": "Dán bản ghi của bạn vào đây...",
     "extractRecipe": "Trích xuất công thức",
     "parseTranscript": "Phân tích bản ghi",
+    "sendToAI": "Gửi đến AI",
     "extracting": "Đang trích xuất..."
   },
   "dialogs": {

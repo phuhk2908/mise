@@ -24,3 +24,4 @@ export * from "./components/ServingScaler";
 export * from "./components/IngredientItem";
 export * from "./components/UnitSelect";
 export * from "./components/ConfirmDialog";
+export * from "./components/Select";

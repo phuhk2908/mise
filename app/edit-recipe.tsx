@@ -182,10 +182,15 @@ export default function EditRecipeScreen() {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={{ flex: 1 }}
       >
-        <ScrollView className="flex-1" contentContainerClassName="px-4 pt-6 pb-8 gap-5">
+        <ScrollView
+          className="flex-1"
+          contentContainerClassName="px-4 pt-6 pb-8 gap-5"
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
+        >
           {/* Header */}
           <View className="flex-row items-center gap-3">
             <Pressable

@@ -11,8 +11,9 @@
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
-        "NSMicrophoneUsageDescription": "Mise uses the microphone to transcribe your spoken recipes into text.",
-        "NSSpeechRecognitionUsageDescription": "Mise uses speech recognition to turn your voice into structured recipes."
+        "NSMicrophoneUsageDescription": "Mise uses the microphone to record audio notes of your recipes.",
+        "NSCameraUsageDescription": "Mise uses the camera to capture recipe photos.",
+        "NSPhotoLibraryUsageDescription": "Mise accesses your photos to let you choose recipe images."
       }
     },
     "android": {
@@ -43,7 +44,16 @@
         }
       ],
       "expo-secure-store",
-      "expo-speech-recognition"
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Mise accesses your photos to let you choose recipe images.",
+          "cameraPermission": "Mise uses the camera to capture recipe photos."
+        }
+      ],
+      "expo-localization",
+      "expo-sqlite",
+      "expo-audio"
     ],
     "experiments": {
       "typedRoutes": true,

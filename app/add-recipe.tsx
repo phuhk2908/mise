@@ -5,10 +5,12 @@ import {
   View,
   Pressable,
   TextInput,
+  Image,
   Platform,
   KeyboardAvoidingView,
   ActivityIndicator,
 } from "react-native";
+import * as ImagePicker from "expo-image-picker";
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, Easing } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, useLocalSearchParams } from "expo-router";
@@ -21,7 +23,6 @@ import {
   Camera01Icon,
   ImageAdd01Icon,
   Mic01Icon,
-  CheckmarkCircle01Icon,
   Cancel01Icon,
   SparklesIcon,
 } from "@hugeicons/core-free-icons";
@@ -37,7 +38,7 @@ import {
 import { api } from "../convex/_generated/api";
 import type { Ingredient, Instruction } from "../src/types";
 import { useAISettings } from "../src/hooks/useAISettings";
-import { extractRecipeFromText } from "../src/ai/extract";
+import { extractRecipeFromText, extractRecipeFromAudio, extractRecipeFromImage } from "../src/ai/extract";
 import type { AIParsedRecipeDraft } from "../src/ai/types";
 import { useVoiceRecording } from "../src/hooks/useVoiceRecording";
 
@@ -105,6 +106,7 @@ export default function AddRecipeScreen() {
   // ── AI state ──
   const { config: aiConfig, isLoaded: aiLoaded } = useAISettings();
   const [photoText, setPhotoText] = useState("");
+  const [photoUri, setPhotoUri] = useState<string | null>(null);
   const [voiceText, setVoiceText] = useState("");
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState<string | null>(null);
@@ -112,28 +114,14 @@ export default function AddRecipeScreen() {
   // ── Voice recording state ──
   const {
     state: voiceState,
-    transcript: voiceTranscript,
+    uri: voiceUri,
+    duration: voiceDuration,
     error: voiceError,
     isSupported: voiceSupported,
     startRecording,
     stopRecording,
     reset: resetVoice,
   } = useVoiceRecording();
-  const [recordingSeconds, setRecordingSeconds] = useState(0);
-
-  useEffect(() => {
-    let interval: ReturnType<typeof setInterval> | null = null;
-    if (voiceState === "recording") {
-      interval = setInterval(() => {
-        setRecordingSeconds((s) => s + 1);
-      }, 1000);
-    } else {
-      setRecordingSeconds(0);
-    }
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [voiceState]);
 
   const addIngredient = () => {
     setIngredients((prev) => [
@@ -191,6 +179,77 @@ export default function AddRecipeScreen() {
       setAiError(msg);
     } finally {
       setAiLoading(false);
+    }
+  };
+
+  const handleAIExtractAudio = async (audioUri: string) => {
+    if (!audioUri) return;
+
+    setAiLoading(true);
+    setAiError(null);
+    try {
+      const draft = await extractRecipeFromAudio(audioUri);
+      router.push({
+        pathname: "/ai-review",
+        params: { draft: JSON.stringify(draft) },
+      } as any);
+    } catch (err) {
+      const msg =
+        err instanceof Error ? err.message : t("aiErrors.unknown");
+      setAiError(msg);
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
+  const handleAIExtractImage = async (imageUri: string) => {
+    if (!imageUri) return;
+
+    setAiLoading(true);
+    setAiError(null);
+    try {
+      const draft = await extractRecipeFromImage(imageUri);
+      router.push({
+        pathname: "/ai-review",
+        params: { draft: JSON.stringify(draft) },
+      } as any);
+    } catch (err) {
+      const msg =
+        err instanceof Error ? err.message : t("aiErrors.unknown");
+      setAiError(msg);
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
+  const handleCamera = async () => {
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    if (status !== "granted") {
+      setAiError(t("addRecipe.photo.cameraPermissionRequired"));
+      return;
+    }
+    const result = await ImagePicker.launchCameraAsync({
+      allowsEditing: true,
+      quality: 0.8,
+    });
+    if (!result.canceled && result.assets[0]) {
+      setPhotoUri(result.assets[0].uri);
+    }
+  };
+
+  const handleGalleryPick = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== "granted") {
+      setAiError(t("addRecipe.photo.galleryPermissionRequired"));
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ["images"],
+      allowsEditing: true,
+      quality: 0.8,
+    });
+    if (!result.canceled && result.assets[0]) {
+      setPhotoUri(result.assets[0].uri);
     }
   };
 
@@ -305,10 +364,15 @@ export default function AddRecipeScreen() {
       </View>
 
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={{ flex: 1 }}
       >
-        <ScrollView className="flex-1" contentContainerClassName="px-4 pt-4 pb-8 gap-5">
+        <ScrollView
+          className="flex-1"
+          contentContainerClassName="px-4 pt-4 pb-8 gap-5"
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
+        >
           {/* Save error feedback */}
           {saveError ? (
             <Feedback message={saveError} variant="error" />
@@ -612,7 +676,7 @@ export default function AddRecipeScreen() {
               </View>
 
               <View className="gap-3">
-                <ThemedButton onPress={() => {}}>
+                <ThemedButton onPress={handleCamera}>
                   <View className="flex-row items-center gap-2">
                     <HugeiconsIcon
                       icon={Camera01Icon}
@@ -629,7 +693,7 @@ export default function AddRecipeScreen() {
                   </View>
                 </ThemedButton>
 
-                <ThemedButton variant="secondary" onPress={() => {}}>
+                <ThemedButton variant="secondary" onPress={handleGalleryPick}>
                   <View className="flex-row items-center gap-2">
                     <HugeiconsIcon
                       icon={ImageAdd01Icon}
@@ -646,6 +710,69 @@ export default function AddRecipeScreen() {
                   </View>
                 </ThemedButton>
               </View>
+
+              {/* Selected image preview */}
+              {photoUri && (
+                <View className="gap-2">
+                  <ThemedText variant="bodySmall" style={{ fontFamily: "Baloo2-SemiBold" }}>
+                    {t("addRecipe.photo.imageSelected")}
+                  </ThemedText>
+                  <View className="rounded-2xl border overflow-hidden" style={{ borderColor: colors.outline }}>
+                    <Image
+                      source={{ uri: photoUri }}
+                      style={{ width: "100%", height: 200, resizeMode: "cover" }}
+                    />
+                    <Pressable
+                      onPress={() => setPhotoUri(null)}
+                      className="absolute top-2 right-2 rounded-full px-2 py-1"
+                      style={{ backgroundColor: colors.error + "CC" }}
+                    >
+                      <ThemedText variant="caption" style={{ color: colors.white, fontFamily: "Baloo2-SemiBold" }}>
+                        {t("addRecipe.photo.removeImage")}
+                      </ThemedText>
+                    </Pressable>
+                  </View>
+
+                  {/* Extract from image button */}
+                  {!aiConfig && aiLoaded ? (
+                    <View className="rounded-2xl border px-4 py-4 gap-3" style={{ backgroundColor: colors.surface, borderColor: colors.outline }}>
+                      <ThemedText variant="bodySmall" style={{ fontFamily: "Baloo2-SemiBold" }}>
+                        {t("addRecipe.ai.notConfiguredTitle")}
+                      </ThemedText>
+                      <ThemedText variant="caption" color="secondary">
+                        {t("addRecipe.ai.notConfiguredDesc")}
+                      </ThemedText>
+                      <ThemedButton variant="secondary" onPress={() => router.push("/ai-settings" as any)}>
+                        {t("addRecipe.ai.openSettings")}
+                      </ThemedButton>
+                    </View>
+                  ) : (
+                    <ThemedButton
+                      onPress={() => handleAIExtractImage(photoUri)}
+                      disabled={aiLoading}
+                      loading={aiLoading}
+                    >
+                      <View className="flex-row items-center gap-2">
+                        <HugeiconsIcon
+                          icon={SparklesIcon}
+                          size={18}
+                          color={isDark ? colors.neutral900! : colors.white}
+                          strokeWidth={1.75}
+                        />
+                        <ThemedText
+                          variant="bodySmall"
+                          style={{
+                            color: isDark ? colors.neutral900! : colors.white,
+                            fontFamily: "Baloo2-SemiBold",
+                          }}
+                        >
+                          {aiLoading ? t("addRecipe.ai.extracting") : t("addRecipe.photo.extractFromImage")}
+                        </ThemedText>
+                      </View>
+                    </ThemedButton>
+                  )}
+                </View>
+              )}
 
               <View
                 className="rounded-2xl border px-4 py-4 gap-3"
@@ -674,85 +801,6 @@ export default function AddRecipeScreen() {
                 </View>
               </View>
 
-              {/* ── AI Text Extraction ── */}
-              <View className="gap-3">
-                <View className="flex-row items-center gap-2">
-                  <View className="h-px flex-1" style={{ backgroundColor: colors.outline }} />
-                  <ThemedText variant="caption" color="muted">
-                    OR
-                  </ThemedText>
-                  <View className="h-px flex-1" style={{ backgroundColor: colors.outline }} />
-                </View>
-
-                {!aiConfig && aiLoaded ? (
-                  <View
-                    className="rounded-2xl border px-4 py-4 gap-3"
-                    style={{ backgroundColor: colors.surface, borderColor: colors.outline }}
-                  >
-                    <ThemedText variant="bodySmall" style={{ fontFamily: "Baloo2-SemiBold" }}>
-                      {t("addRecipe.ai.notConfiguredTitle")}
-                    </ThemedText>
-                    <ThemedText variant="caption" color="secondary">
-                      {t("addRecipe.ai.notConfiguredDesc")}
-                    </ThemedText>
-                    <ThemedButton
-                      variant="secondary"
-                      onPress={() => router.push("/ai-settings" as any)}
-                    >
-                      {t("addRecipe.ai.openSettings")}
-                    </ThemedButton>
-                  </View>
-                ) : (
-                  <>
-                    <TextInput
-                      className="min-h-32 rounded-xl border px-4 py-3"
-                      style={{
-                        backgroundColor: colors.surface,
-                        borderColor: colors.outline,
-                        color: colors.textPrimary,
-                        fontFamily: "Baloo2-Regular",
-                        fontSize: 14,
-                        textAlignVertical: "top",
-                      }}
-                      placeholder={t("addRecipe.ai.pasteText")}
-                      placeholderTextColor={colors.textMuted}
-                      value={photoText}
-                      onChangeText={setPhotoText}
-                      multiline
-                    />
-
-                    {aiError ? (
-                      <ThemedText variant="caption" color="error">
-                        {aiError}
-                      </ThemedText>
-                    ) : null}
-
-                    <ThemedButton
-                      onPress={() => handleAIExtract(photoText)}
-                      disabled={!photoText.trim() || aiLoading}
-                      loading={aiLoading}
-                    >
-                      <View className="flex-row items-center gap-2">
-                        <HugeiconsIcon
-                          icon={SparklesIcon}
-                          size={18}
-                          color={isDark ? colors.neutral900! : colors.white}
-                          strokeWidth={1.75}
-                        />
-                        <ThemedText
-                          variant="bodySmall"
-                          style={{
-                            color: isDark ? colors.neutral900! : colors.white,
-                            fontFamily: "Baloo2-SemiBold",
-                          }}
-                        >
-                          {aiLoading ? t("addRecipe.ai.extracting") : t("addRecipe.ai.extractRecipe")}
-                        </ThemedText>
-                      </View>
-                    </ThemedButton>
-                  </>
-                )}
-              </View>
             </>
           )}
 
@@ -762,9 +810,9 @@ export default function AddRecipeScreen() {
               <View className="items-center gap-4 py-6">
                 {/* Mic button */}
                 <Pressable
-                  onPress={() => {
-                    if (voiceState === "recording" || voiceState === "processing") {
-                      stopRecording();
+                  onPress={async () => {
+                    if (voiceState === "recording") {
+                      await stopRecording();
                     } else if (voiceState === "done") {
                       resetVoice();
                     } else {
@@ -811,9 +859,9 @@ export default function AddRecipeScreen() {
                     }}
                   >
                     {t("addRecipe.voice.listening")} {" "}
-                    {`${Math.floor(recordingSeconds / 60)
+                    {`${Math.floor(voiceDuration / 60)
                       .toString()
-                      .padStart(2, "0")}:${(recordingSeconds % 60)
+                      .padStart(2, "0")}:${(voiceDuration % 60)
                       .toString()
                       .padStart(2, "0")}`}
                   </ThemedText>
@@ -841,6 +889,8 @@ export default function AddRecipeScreen() {
                       ? t("addRecipe.voice.subheading")
                       : voiceState === "recording"
                       ? t("addRecipe.voice.keepSpeaking")
+                      : voiceState === "done"
+                      ? t("addRecipe.voice.recordingSaved")
                       : null}
                   </ThemedText>
                 </View>
@@ -865,26 +915,22 @@ export default function AddRecipeScreen() {
                 )}
               </View>
 
-              {/* Transcript preview */}
-              {(voiceState === "recording" ||
-                voiceState === "processing" ||
-                voiceState === "done") && (
+              {/* Audio info */}
+              {voiceState === "done" && voiceUri && (
                 <View className="gap-2">
-                  <ThemedText variant="bodySmall" style={{ fontFamily: "Baloo2-SemiBold" }}>
-                    {t("addRecipe.voice.transcriptPreview")}
-                  </ThemedText>
                   <View
-                    className="min-h-24 rounded-xl border px-4 py-3"
+                    className="rounded-xl border px-4 py-3"
                     style={{
                       backgroundColor: colors.surface,
                       borderColor: colors.outline,
                     }}
                   >
-                    <ThemedText
-                      variant="bodySmall"
-                      color={voiceTranscript ? "primary" : "muted"}
-                    >
-                      {voiceTranscript || t("addRecipe.voice.transcriptEmpty")}
+                    <ThemedText variant="bodySmall" color="secondary">
+                      {t("addRecipe.voice.recordingSaved")} · {`${Math.floor(voiceDuration / 60)
+                        .toString()
+                        .padStart(2, "0")}:${(voiceDuration % 60)
+                        .toString()
+                        .padStart(2, "0")}`}
                     </ThemedText>
                   </View>
                 </View>
@@ -902,10 +948,10 @@ export default function AddRecipeScreen() {
                 </ThemedText>
               ) : null}
 
-              {/* Parse button (when transcript is ready) */}
-              {voiceState === "done" && voiceTranscript.trim() && (
+              {/* Parse button (when audio is ready) */}
+              {voiceState === "done" && voiceUri && (
                 <ThemedButton
-                  onPress={() => handleAIExtract(voiceTranscript)}
+                  onPress={() => handleAIExtractAudio(voiceUri)}
                   disabled={aiLoading}
                   loading={aiLoading}
                 >
@@ -923,44 +969,10 @@ export default function AddRecipeScreen() {
                         fontFamily: "Baloo2-SemiBold",
                       }}
                     >
-                      {aiLoading ? t("addRecipe.ai.extracting") : t("addRecipe.ai.parseTranscript")}
+                      {aiLoading ? t("addRecipe.ai.extracting") : t("addRecipe.ai.sendToAI")}
                     </ThemedText>
                   </View>
                 </ThemedButton>
-              )}
-
-              {/* Tips card (only when idle) */}
-              {voiceState === "idle" && (
-                <View
-                  className="rounded-2xl border px-4 py-4 gap-3"
-                  style={{ backgroundColor: colors.surface, borderColor: colors.outline }}
-                >
-                  <View className="flex-row items-center gap-2">
-                    <HugeiconsIcon
-                      icon={SparklesIcon}
-                      size={20}
-                      color={colors.primary}
-                      strokeWidth={1.75}
-                    />
-                    <View className="flex-1">
-                      <ThemedText variant="bodySmall" style={{ fontFamily: "Baloo2-SemiBold" }}>
-                        {t("addRecipe.voice.understandTitle")}
-                      </ThemedText>
-                    </View>
-                  </View>
-
-                  <View className="flex-row items-center gap-2">
-                    <HugeiconsIcon
-                      icon={CheckmarkCircle01Icon}
-                      size={18}
-                      color={colors.success}
-                      strokeWidth={1.75}
-                    />
-                    <ThemedText variant="caption" color="secondary">
-                      {t("addRecipe.voice.worksOffline")}
-                    </ThemedText>
-                  </View>
-                </View>
               )}
 
               {/* ── Text fallback ── */}
@@ -968,7 +980,7 @@ export default function AddRecipeScreen() {
                 <View className="flex-row items-center gap-2">
                   <View className="h-px flex-1" style={{ backgroundColor: colors.outline }} />
                   <ThemedText variant="caption" color="muted">
-                    OR
+                    {t("addRecipe.photo.or")}
                   </ThemedText>
                   <View className="h-px flex-1" style={{ backgroundColor: colors.outline }} />
                 </View>
