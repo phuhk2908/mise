@@ -5,8 +5,6 @@ import {
   Pressable,
   TextInput as RNTextInput,
   ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
@@ -25,7 +23,6 @@ import {
   ThemedText,
   ThemedButton,
   Input,
-  SelectField,
   useAppTheme,
 } from "../src/design-system";
 import { useAISettings } from "../src/hooks/useAISettings";
@@ -37,8 +34,6 @@ import {
 const PROVIDER_OPTIONS: Array<{ value: "ollama"; label: string }> = [
   { value: "ollama", label: "Ollama" },
 ];
-
-const OLLAMA_CLOUD_URL = "https://ollama.com/";
 
 export default function AISettingsScreen() {
   const { colors } = useAppTheme();
@@ -58,7 +53,6 @@ export default function AISettingsScreen() {
 
   const [provider, setProvider] = useState<"ollama">("ollama");
   const [model, setModel] = useState("");
-  const [urlMode, setUrlMode] = useState<"local" | "cloud">("local");
   const [baseUrl, setBaseUrl] = useState(OLLAMA_DEFAULT_BASE_URL);
   const [apiKey, setApiKey] = useState("");
   const [showKey, setShowKey] = useState(false);
@@ -66,26 +60,15 @@ export default function AISettingsScreen() {
   const [availableModels, setAvailableModels] = useState<string[]>([]);
   const [fetchingModels, setFetchingModels] = useState(false);
 
-  const urlModeOptions = [
-    { value: "local", label: t("aiSettings.local") },
-    { value: "cloud", label: t("aiSettings.cloud") },
-  ];
-
   // Sync local state when config loads
   useEffect(() => {
     if (config) {
       setProvider(config.provider);
       setModel(config.model);
-      if (config.baseUrl === OLLAMA_CLOUD_URL) {
-        setUrlMode("cloud");
-      } else {
-        setUrlMode("local");
-      }
       setBaseUrl(config.baseUrl || OLLAMA_DEFAULT_BASE_URL);
       setApiKey(config.apiKey);
       setHasSavedKey(true);
     } else {
-      setUrlMode("local");
       setBaseUrl(OLLAMA_DEFAULT_BASE_URL);
       setHasSavedKey(false);
     }
@@ -120,15 +103,9 @@ export default function AISettingsScreen() {
     setHasSavedKey(true);
   }, [provider, model, baseUrl, apiKey, save]);
 
-  const handleUrlModeChange = useCallback((mode: "local" | "cloud") => {
-    setUrlMode(mode);
-    setBaseUrl(mode === "local" ? OLLAMA_DEFAULT_BASE_URL : OLLAMA_CLOUD_URL);
-  }, []);
-
   const handleClear = useCallback(async () => {
     await clear();
     setModel("");
-    setUrlMode("local");
     setBaseUrl(OLLAMA_DEFAULT_BASE_URL);
     setApiKey("");
     setHasSavedKey(false);
@@ -139,16 +116,10 @@ export default function AISettingsScreen() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-        style={{ flex: 1 }}
+      <ScrollView
+        className="flex-1"
+        contentContainerClassName="px-4 pt-4 pb-8 gap-5"
       >
-        <ScrollView
-          className="flex-1"
-          contentContainerClassName="px-4 pt-4 pb-20 gap-5"
-          keyboardShouldPersistTaps="handled"
-          keyboardDismissMode="interactive"
-        >
         {/* Header */}
         <View className="flex-row items-center gap-3">
           <Pressable
@@ -195,52 +166,115 @@ export default function AISettingsScreen() {
         {/* Form */}
         <View className="gap-4">
           {/* Provider */}
-          <SelectField
-            label={t("aiSettings.provider")}
-            value={provider}
-            options={PROVIDER_OPTIONS}
-            onChange={(value) => setProvider(value as "ollama")}
-          />
-
-          {/* Server Type */}
-          <SelectField
-            label={t("aiSettings.serverType")}
-            value={urlMode}
-            options={urlModeOptions}
-            onChange={(value) => handleUrlModeChange(value as "local" | "cloud")}
-          />
+          <View className="gap-2">
+            <ThemedText variant="caption" color="secondary">
+              {t("aiSettings.provider")}
+            </ThemedText>
+            <View className="flex-row gap-2">
+              {PROVIDER_OPTIONS.map((option) => {
+                const active = provider === option.value;
+                return (
+                  <Pressable
+                    key={option.value}
+                    onPress={() => setProvider(option.value)}
+                    className="flex-1 flex-row items-center justify-center gap-2 rounded-xl border px-3 py-2"
+                    style={{
+                      backgroundColor: active
+                        ? colors.primary + "15"
+                        : colors.surface,
+                      borderColor: active ? colors.primary : colors.outline,
+                    }}
+                  >
+                    <ThemedText
+                      variant="bodySmall"
+                      style={{
+                        color: active ? colors.primary : colors.textSecondary,
+                        fontFamily: active
+                          ? "Baloo2-SemiBold"
+                          : "Baloo2-Regular",
+                      }}
+                    >
+                      {option.label}
+                    </ThemedText>
+                  </Pressable>
+                );
+              })}
+            </View>
+          </View>
 
           {/* Model */}
-          {fetchingModels ? (
-            <View className="flex-row items-center gap-2 py-1">
-              <ActivityIndicator size="small" color={colors.primary} />
-              <ThemedText variant="caption" color="muted">
-                {t("aiSettings.fetchingModels")}
-              </ThemedText>
-            </View>
-          ) : availableModels.length > 0 ? (
-            <SelectField
-              label={t("aiSettings.model")}
-              value={model}
-              options={(() => {
-                const opts = availableModels.map((m) => ({ value: m, label: m }));
-                if (model && !availableModels.some((m) => m === model)) {
-                  opts.unshift({ value: model, label: model });
-                }
-                return opts;
-              })()}
-              onChange={setModel}
+          <View className="gap-2">
+            <ThemedText variant="caption" color="secondary">
+              {t("aiSettings.model")}
+            </ThemedText>
+            <RNTextInput
+              className="min-h-11 rounded-xl border px-3"
+              style={{
+                borderColor: colors.outline,
+                backgroundColor: colors.surface,
+                color: colors.textPrimary,
+                fontFamily: "Baloo2-Regular",
+                fontSize: 14,
+                lineHeight: 20,
+                height: 44,
+              }}
               placeholder={t("aiSettings.modelPlaceholder")}
-            />
-          ) : (
-            <Input
-              label={t("aiSettings.model")}
-              placeholder={t("aiSettings.modelPlaceholder")}
+              placeholderTextColor={colors.textMuted}
               value={model}
               onChangeText={setModel}
               autoCapitalize="none"
             />
-          )}
+
+            {/* Public model suggestions */}
+            {fetchingModels ? (
+              <View className="flex-row items-center gap-2 py-1">
+                <ActivityIndicator size="small" color={colors.primary} />
+                <ThemedText variant="caption" color="muted">
+                  {t("aiSettings.fetchingModels")}
+                </ThemedText>
+              </View>
+            ) : availableModels.length > 0 ? (
+              <View className="gap-2">
+                <ThemedText variant="caption" color="muted">
+                  {t("aiSettings.popularModels")}
+                </ThemedText>
+                <View className="flex-row flex-wrap gap-2">
+                  {availableModels.slice(0, 20).map((m) => {
+                    const active = model === m;
+                    return (
+                      <Pressable
+                        key={m}
+                        onPress={() => setModel(m)}
+                        className="rounded-full border px-3 py-1.5"
+                        style={{
+                          backgroundColor: active
+                            ? colors.primary + "15"
+                            : colors.surface,
+                          borderColor: active
+                            ? colors.primary
+                            : colors.outline,
+                        }}
+                      >
+                        <ThemedText
+                          variant="caption"
+                          style={{
+                            color: active
+                              ? colors.primary
+                              : colors.textSecondary,
+                            fontFamily: active
+                              ? "Baloo2-SemiBold"
+                              : "Baloo2-Regular",
+                          }}
+                        >
+                          {m}
+                        </ThemedText>
+                      </Pressable>
+                    );
+                  })}
+                </View>
+              </View>
+            ) : null}
+          </View>
 
           {/* Base URL */}
           <Input
@@ -341,14 +375,7 @@ export default function AISettingsScreen() {
         <View className="gap-3">
           <ThemedButton
             variant="secondary"
-            onPress={() =>
-              testConnection({
-                provider,
-                model: model.trim(),
-                baseUrl: baseUrl.trim(),
-                apiKey: apiKey.trim(),
-              })
-            }
+            onPress={testConnection}
             disabled={isTesting || !isFormValid}
             loading={isTesting}
           >
@@ -387,7 +414,6 @@ export default function AISettingsScreen() {
           )}
         </View>
       </ScrollView>
-      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }

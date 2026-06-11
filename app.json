@@ -12,9 +12,7 @@
       "supportsTablet": true,
       "infoPlist": {
         "NSMicrophoneUsageDescription": "Mise uses the microphone to transcribe your spoken recipes into text.",
-        "NSSpeechRecognitionUsageDescription": "Mise uses speech recognition to turn your voice into structured recipes.",
-        "NSCameraUsageDescription": "Mise uses the camera to capture recipe images for extraction.",
-        "NSPhotoLibraryUsageDescription": "Mise uses your photo library to select recipe images for extraction."
+        "NSSpeechRecognitionUsageDescription": "Mise uses speech recognition to turn your voice into structured recipes."
       }
     },
     "android": {
@@ -23,13 +21,7 @@
         "foregroundImage": "./assets/images/android-icon-foreground.png"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false,
-      "permissions": [
-        "android.permission.RECORD_AUDIO",
-        "android.permission.CAMERA",
-        "android.permission.READ_EXTERNAL_STORAGE"
-      ],
-      "package": "com.fuofuo.mise"
+      "predictiveBackGestureEnabled": false
     },
     "web": {
       "output": "static",
@@ -51,18 +43,11 @@
         }
       ],
       "expo-secure-store",
-      "expo-localization",
-      "expo-audio"
+      "expo-speech-recognition"
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    },
-    "extra": {
-      "router": {},
-      "eas": {
-        "projectId": "0f8ab92c-e5fe-43bb-b8f0-31bd336571bd"
-      }
     }
   }
 }

@@ -19,14 +19,14 @@ import {
 import { ThemedText, Chip, useAppTheme, EmptyState } from "../../src/design-system";
 import { api } from "../../convex/_generated/api";
 
-const STATIC_TAGS = ["all", "favorites", "dinner", "quick", "breakfast", "vegetarian"];
+const STATIC_TAGS = ["All", "Favorites", "Dinner", "Quick", "Breakfast", "Vegetarian"];
 
 export default function RecipesScreen() {
   const { colors } = useAppTheme();
   const router = useRouter();
   const { t } = useTranslation();
 
-  const [activeTag, setActiveTag] = useState("all");
+  const [activeTag, setActiveTag] = useState("All");
 
   const recipesData = useQuery(api.recipes.getAll);
   const allTagsData = useQuery(api.recipes.getTags);
@@ -43,8 +43,8 @@ export default function RecipesScreen() {
   };
 
   const filtered = recipes.filter((r) => {
-    if (activeTag === "all") return true;
-    if (activeTag === "favorites") return false;
+    if (activeTag === "All") return true;
+    if (activeTag === "Favorites") return false;
     return r.tags.includes(activeTag);
   });
 
@@ -129,27 +129,21 @@ export default function RecipesScreen() {
                           {recipe.title}
                         </ThemedText>
                         <View className="flex-row items-center gap-1 mt-1">
-                          {recipe.servings ? (
+                          <ThemedText variant="caption" color="secondary">
+                            {t("home.servingsOnly", { servings: recipe.servings })}
+                          </ThemedText>
+                          <View className="h-1 w-1 rounded-full" style={{ backgroundColor: colors.textMuted }} />
+                          <View className="flex-row items-center gap-1">
+                            <HugeiconsIcon
+                              icon={Clock01Icon}
+                              size={12}
+                              color={colors.textMuted}
+                              strokeWidth={1.75}
+                            />
                             <ThemedText variant="caption" color="secondary">
-                              {t("home.servingsOnly", { servings: recipe.servings })}
+                              {recipe.prepTime}
                             </ThemedText>
-                          ) : null}
-                          {recipe.servings && recipe.prepTime ? (
-                            <View className="h-1 w-1 rounded-full" style={{ backgroundColor: colors.textMuted }} />
-                          ) : null}
-                          {recipe.prepTime ? (
-                            <View className="flex-row items-center gap-1">
-                              <HugeiconsIcon
-                                icon={Clock01Icon}
-                                size={12}
-                                color={colors.textMuted}
-                                strokeWidth={1.75}
-                              />
-                              <ThemedText variant="caption" color="secondary">
-                                {recipe.prepTime}
-                              </ThemedText>
-                            </View>
-                          ) : null}
+                          </View>
                         </View>
                       </View>
                       <HugeiconsIcon

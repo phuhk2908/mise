@@ -31,28 +31,9 @@ export interface GenerateResponse {
 
 export async function generate(
   config: AIConfig,
-  prompt: string,
-  images?: string[],
-  audio?: string[]
+  prompt: string
 ): Promise<GenerateResponse> {
   const url = `${config.baseUrl.replace(/\/$/, "")}/api/generate`;
-
-  if (audio && audio.length > 0) {
-    throw new AIError(
-      "AUDIO_NOT_SUPPORTED",
-      "This AI provider does not support audio input. Please use the Photo tab to paste recipe text instead."
-    );
-  }
-
-  const body: Record<string, unknown> = {
-    model: config.model,
-    prompt,
-    stream: false,
-    format: "json",
-  };
-  if (images && images.length > 0) {
-    body.images = images;
-  }
 
   try {
     const response = await fetchWithTimeout(
@@ -63,7 +44,12 @@ export async function generate(
           "Content-Type": "application/json",
           ...(config.apiKey ? { Authorization: `Bearer ${config.apiKey}` } : {}),
         },
-        body: JSON.stringify(body),
+        body: JSON.stringify({
+          model: config.model,
+          prompt,
+          stream: false,
+          format: "json",
+        }),
       },
       REQUEST_TIMEOUT_MS
     );

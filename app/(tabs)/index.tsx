@@ -171,9 +171,9 @@ export default function HomeScreen() {
                         {recipe.title}
                       </ThemedText>
                       <ThemedText variant="caption" color="secondary">
-                        {recipe.servings > 0 && recipe.prepTime
+                        {recipe.servings && recipe.prepTime
                           ? t("home.servingsPrep", { servings: recipe.servings, prepTime: recipe.prepTime })
-                          : recipe.servings > 0
+                          : recipe.servings
                           ? t("home.servingsOnly", { servings: recipe.servings })
                           : null}
                       </ThemedText>
@@ -261,7 +261,7 @@ export default function HomeScreen() {
                             {recipe.title}
                           </ThemedText>
                           <ThemedText variant="caption" color="secondary">
-                            {recipe.servings > 0 ? t("home.servingsOnly", { servings: recipe.servings }) : null}
+                            {recipe.servings ? t("home.servingsOnly", { servings: recipe.servings }) : null}
                           </ThemedText>
                         </View>
                         <HugeiconsIcon
