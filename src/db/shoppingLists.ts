@@ -3,9 +3,9 @@
  * Supports generating lists from recipes or meal plans.
  */
 import { SQLiteDatabase } from 'expo-sqlite';
-import { ShoppingList, ShoppingItem, Recipe, Ingredient } from '../types';
-import { getRecipeById } from './recipes';
+import { ShoppingItem, ShoppingList } from '../types';
 import { getPlannedMealsForDateRange } from './mealPlans';
+import { getRecipeById } from './recipes';
 
 interface ShoppingListRow {
   id: string;

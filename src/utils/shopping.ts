@@ -1,4 +1,4 @@
-import { normalizeUnit, getUnitCategory } from "./unitConverter";
+import { normalizeUnit } from "./unitConverter";
 
 export interface ShoppingIngredient {
   id: string;
