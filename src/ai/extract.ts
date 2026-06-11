@@ -2,7 +2,7 @@
  * Orchestrator: extract a recipe draft from raw text or audio via the configured AI provider.
  */
 
-import ExpoFileSystem from 'expo-file-system';
+import { File } from 'expo-file-system';
 import { generate } from "./ollama";
 import { parseRecipeResponse } from "./parser";
 import { buildRecipeExtractionPrompt, buildRecipeVisionPrompt } from "./prompts";
@@ -52,8 +52,8 @@ export async function extractRecipeFromAudioWithConfig(
   // Read audio file as base64
   let audioBase64: string;
   try {
-    const fileContent = await ExpoFileSystem.readAsStringAsync(audioUri, { encoding: 'base64' });
-    audioBase64 = fileContent;
+    const audioFile = new File(audioUri);
+    audioBase64 = await audioFile.base64();
   } catch (e) {
     throw new AIError("READ_ERROR", "Failed to read audio file.");
   }
@@ -83,8 +83,8 @@ export async function extractRecipeFromImageWithConfig(
   // Read image file as base64
   let imageBase64: string;
   try {
-    const fileContent = await ExpoFileSystem.readAsStringAsync(imageUri, { encoding: 'base64' });
-    imageBase64 = fileContent;
+    const imageFile = new File(imageUri);
+    imageBase64 = await imageFile.base64();
   } catch (e) {
     throw new AIError("READ_ERROR", "Failed to read image file.");
   }
