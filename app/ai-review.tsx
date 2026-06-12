@@ -19,7 +19,7 @@ import {
   Delete02Icon,
   Alert01Icon,
   CheckmarkCircle01Icon,
-  SparklesIcon,
+  InformationCircleIcon,
 } from "@hugeicons/core-free-icons";
 import {
   ThemedText,
@@ -61,6 +61,34 @@ function genId() {
   return `ai-${Date.now()}-${++nextId}`;
 }
 
+interface ReviewIngredient {
+  id: string;
+  name: string;
+  amount: number;
+  unit: string;
+  originalText: string;
+  notes?: string;
+  optional: boolean;
+  // AI metadata for display
+  aiAmount: number | null;
+  aiQuantityText: string | null;
+  aiDisplayQuantity: string | null;
+  aiUnitCategory: string;
+  aiScalingPolicy: string;
+  aiIsRange: boolean;
+  aiRangeMin: number | null;
+  aiRangeMax: number | null;
+  aiRangeUnit: string | null;
+  aiConfidence: string;
+  aiWarnings: string[];
+}
+
+interface ReviewStep {
+  id: string;
+  stepNumber: number;
+  text: string;
+}
+
 export default function AIReviewScreen() {
   const { colors } = useAppTheme();
   const router = useRouter();
@@ -72,11 +100,13 @@ export default function AIReviewScreen() {
       return JSON.parse(draftParam) as AIParsedRecipeDraft;
     } catch {
       return {
-        title: "",
+        title: null,
         description: "",
         prepTime: "",
         cookTime: "",
-        servings: 4,
+        servings: 1,
+        servingsSource: "default",
+        servingsNote: "Failed to parse draft.",
         ingredients: [],
         steps: [],
         categories: [],
@@ -87,23 +117,34 @@ export default function AIReviewScreen() {
     }
   });
 
-  const [title, setTitle] = useState(parsedDraft.title);
+  const [title, setTitle] = useState(parsedDraft.title ?? "");
   const [description, setDescription] = useState(parsedDraft.description);
   const [prepTime, setPrepTime] = useState(parsedDraft.prepTime);
   const [cookTime, setCookTime] = useState(parsedDraft.cookTime);
-  const [servings, setServings] = useState(parsedDraft.servings || 4);
-  const [ingredients, setIngredients] = useState(
+  const [servings, setServings] = useState(parsedDraft.servings || 1);
+  const [ingredients, setIngredients] = useState<ReviewIngredient[]>(
     parsedDraft.ingredients.map((i) => ({
       id: genId(),
       name: i.name,
       amount: i.amount ?? 0,
       unit: i.unit,
       originalText: i.originalText,
-      notes: i.notes,
+      notes: i.notes ?? undefined,
       optional: false,
+      aiAmount: i.amount ?? null,
+      aiQuantityText: i.quantityText,
+      aiDisplayQuantity: i.displayQuantity,
+      aiUnitCategory: i.unitCategory,
+      aiScalingPolicy: i.scalingPolicy,
+      aiIsRange: i.isRange,
+      aiRangeMin: i.rangeMin,
+      aiRangeMax: i.rangeMax,
+      aiRangeUnit: i.rangeUnit,
+      aiConfidence: i.confidence,
+      aiWarnings: i.warnings,
     }))
   );
-  const [steps, setSteps] = useState(
+  const [steps, setSteps] = useState<ReviewStep[]>(
     parsedDraft.steps.map((s) => ({
       id: genId(),
       stepNumber: s.stepNumber,
@@ -131,6 +172,17 @@ export default function AIReviewScreen() {
         originalText: "",
         notes: undefined,
         optional: false,
+        aiAmount: null,
+        aiQuantityText: null,
+        aiDisplayQuantity: null,
+        aiUnitCategory: "unknown",
+        aiScalingPolicy: "review",
+        aiIsRange: false,
+        aiRangeMin: null,
+        aiRangeMax: null,
+        aiRangeUnit: null,
+        aiConfidence: "low",
+        aiWarnings: [],
       },
     ]);
   };
@@ -232,6 +284,7 @@ export default function AIReviewScreen() {
   ]);
 
   const showLowConfidence = parsedDraft.confidence === "low";
+  const hasServingsDefault = parsedDraft.servingsSource === "default";
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
@@ -357,6 +410,33 @@ export default function AIReviewScreen() {
                   </View>
                 ))}
               </View>
+            </View>
+          )}
+
+          {/* Servings default note */}
+          {hasServingsDefault && parsedDraft.servingsNote && (
+            <View
+              className="flex-row items-center gap-2 rounded-xl border px-4 py-3"
+              style={{
+                backgroundColor: (colors.info ?? "#3B82F6") + "10",
+                borderColor: colors.info ?? "#3B82F6",
+              }}
+            >
+              <HugeiconsIcon
+                icon={InformationCircleIcon}
+                size={18}
+                color={colors.info ?? "#3B82F6"}
+                strokeWidth={2}
+              />
+              <ThemedText
+                variant="bodySmall"
+                style={{
+                  fontFamily: "Baloo2-SemiBold",
+                  color: colors.info ?? "#3B82F6",
+                }}
+              >
+                {parsedDraft.servingsNote}
+              </ThemedText>
             </View>
           )}
 
@@ -530,6 +610,109 @@ export default function AIReviewScreen() {
                       />
                     </Pressable>
                   </View>
+
+                  {/* AI metadata row */}
+                  <View className="flex-row flex-wrap gap-1.5">
+                    {ing.aiDisplayQuantity && (
+                      <View
+                        className="rounded-full px-2 py-0.5"
+                        style={{ backgroundColor: colors.primary + "14" }}
+                      >
+                        <ThemedText
+                          variant="caption"
+                          style={{ color: colors.primary, fontFamily: "Baloo2-SemiBold" }}
+                        >
+                          {ing.aiDisplayQuantity}
+                        </ThemedText>
+                      </View>
+                    )}
+                    {ing.aiIsRange && ing.aiRangeUnit && (
+                      <View
+                        className="rounded-full px-2 py-0.5"
+                        style={{ backgroundColor: colors.warning + "14" }}
+                      >
+                        <ThemedText
+                          variant="caption"
+                          style={{
+                            color: colors.warning ?? "#F59E0B",
+                            fontFamily: "Baloo2-SemiBold",
+                          }}
+                        >
+                          {ing.aiRangeMin ?? "?"}-{ing.aiRangeMax ?? "?"} {ing.aiRangeUnit}
+                        </ThemedText>
+                      </View>
+                    )}
+                    {ing.aiScalingPolicy === "review" && (
+                      <View
+                        className="rounded-full px-2 py-0.5"
+                        style={{ backgroundColor: colors.error + "14" }}
+                      >
+                        <ThemedText
+                          variant="caption"
+                          style={{ color: colors.error, fontFamily: "Baloo2-SemiBold" }}
+                        >
+                          Review
+                        </ThemedText>
+                      </View>
+                    )}
+                    {ing.aiScalingPolicy === "no_scale" && (
+                      <View
+                        className="rounded-full px-2 py-0.5"
+                        style={{ backgroundColor: colors.success + "14" }}
+                      >
+                        <ThemedText
+                          variant="caption"
+                          style={{ color: colors.success, fontFamily: "Baloo2-SemiBold" }}
+                        >
+                          To taste
+                        </ThemedText>
+                      </View>
+                    )}
+                    {ing.aiConfidence !== "high" && (
+                      <View
+                        className="rounded-full px-2 py-0.5"
+                        style={{ backgroundColor: colors.warning + "14" }}
+                      >
+                        <ThemedText
+                          variant="caption"
+                          style={{
+                            color: colors.warning ?? "#F59E0B",
+                            fontFamily: "Baloo2-SemiBold",
+                          }}
+                        >
+                          {ing.aiConfidence}
+                        </ThemedText>
+                      </View>
+                    )}
+                    {ing.aiUnitCategory !== "unknown" && (
+                      <View
+                        className="rounded-full px-2 py-0.5"
+                        style={{ backgroundColor: colors.neutral100 ?? colors.outline + "30" }}
+                      >
+                        <ThemedText
+                          variant="caption"
+                          style={{
+                            color: colors.textMuted,
+                            fontFamily: "Baloo2-Regular",
+                          }}
+                        >
+                          {ing.aiUnitCategory}
+                        </ThemedText>
+                      </View>
+                    )}
+                  </View>
+
+                  {/* AI warnings */}
+                  {ing.aiWarnings.length > 0 && (
+                    <View className="gap-1">
+                      {ing.aiWarnings.map((w, idx) => (
+                        <ThemedText key={idx} variant="caption" color="error">
+                          {"• "}{w}
+                        </ThemedText>
+                      ))}
+                    </View>
+                  )}
+
                   {ing.originalText || ing.notes ? (
                     <ThemedText variant="caption" color="muted">
                       {ing.originalText}

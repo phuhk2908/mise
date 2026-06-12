@@ -2,7 +2,7 @@
  * Central types for AI provider integration.
  */
 
-export type AIProvider = "ollama";
+export type AIProvider = "ollama" | "openai" | "anthropic" | "gemini";
 
 export interface AIConfig {
   provider: AIProvider;
@@ -16,7 +16,18 @@ export interface AIParsedIngredient {
   amount: number | null;
   unit: string;
   originalText: string;
-  notes?: string;
+  quantityText: string | null;
+  displayQuantity: string | null;
+  unitCategory: "metric_mass" | "metric_volume" | "preserve_unit" | "to_taste" | "unknown";
+  scalingPolicy: "metric_linear" | "preserve_unit_linear" | "no_scale" | "review";
+  components: { amount: number; unit: string; text: string }[];
+  isRange: boolean;
+  rangeMin: number | null;
+  rangeMax: number | null;
+  rangeUnit: string | null;
+  notes: string | null;
+  confidence: "high" | "medium" | "low";
+  warnings: string[];
 }
 
 export interface AIParsedStep {
@@ -25,11 +36,13 @@ export interface AIParsedStep {
 }
 
 export interface AIParsedRecipeDraft {
-  title: string;
+  title: string | null;
   description: string;
   prepTime: string;
   cookTime: string;
   servings: number;
+  servingsSource: "explicit" | "default";
+  servingsNote: string | null;
   ingredients: AIParsedIngredient[];
   steps: AIParsedStep[];
   categories: string[];
@@ -58,4 +71,12 @@ export class AIError extends Error {
     super(message);
     this.name = "AIError";
   }
+}
+
+/** Cloud providers that require an API key. */
+export const CLOUD_PROVIDERS: AIProvider[] = ["openai", "anthropic", "gemini"];
+
+/** Check if a provider requires an API key (cloud providers). */
+export function isCloudProvider(provider: AIProvider): boolean {
+  return CLOUD_PROVIDERS.includes(provider);
 }

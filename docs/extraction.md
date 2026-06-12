@@ -1,3 +1,4 @@
+```ts
 /**
  * Prompts for recipe extraction via Ollama.
  */
@@ -284,7 +285,8 @@ components:
 Input:
 "vừa đủ tiêu"
 
-components: []
+components:
+[]
 
 ## Range Rule
 
@@ -700,7 +702,8 @@ components:
 Input:
 "vừa đủ tiêu"
 
-components: []
+components:
+[]
 
 ## Range Rule
 
@@ -827,3 +830,4 @@ Important JSON requirements:
 
 Return ONLY the JSON object. No markdown, no explanations, no code fences.`;
 }
+```

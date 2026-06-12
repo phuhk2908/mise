@@ -14,15 +14,18 @@ import { ThemedText } from "./ThemedText";
 import { useAppTheme } from "../theme/useAppTheme";
 
 const COMMON_UNITS = [
+  // Metric
+  "g",
+  "kg",
+  "mg",
+  "ml",
+  "l",
+  // English household
   "cups",
   "tbsp",
   "tsp",
   "oz",
   "lb",
-  "g",
-  "kg",
-  "ml",
-  "l",
   "pinch",
   "cloves",
   "packet",
@@ -54,6 +57,34 @@ const COMMON_UNITS = [
   "kilogram",
   "liter",
   "milliliter",
+  // Vietnamese preserved units
+  "phần",
+  "muỗng",
+  "muỗng canh",
+  "muỗng cà phê",
+  "thìa",
+  "thìa canh",
+  "thìa cà phê",
+  "chén",
+  "bát",
+  "tô",
+  "nắm",
+  "nhúm",
+  "gói",
+  "bịch",
+  "hộp",
+  "lon",
+  "chai",
+  "lọ",
+  "trái",
+  "quả",
+  "củ",
+  "tép",
+  "nhánh",
+  "miếng",
+  "lát",
+  "con",
+  "cây",
 ];
 
 type UnitPickerModalProps = {

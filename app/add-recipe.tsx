@@ -8,7 +8,6 @@ import {
   Image,
   Platform,
   KeyboardAvoidingView,
-  ActivityIndicator,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, Easing } from "react-native-reanimated";
@@ -32,14 +31,13 @@ import {
   ServingScaler,
   UnitSelect,
   useAppTheme,
-  EmptyState,
   Feedback,
 } from "../src/design-system";
 import { api } from "../convex/_generated/api";
 import type { Ingredient, Instruction } from "../src/types";
 import { useAISettings } from "../src/hooks/useAISettings";
 import { extractRecipeFromText, extractRecipeFromAudio, extractRecipeFromImage } from "../src/ai/extract";
-import type { AIParsedRecipeDraft } from "../src/ai/types";
+import { AIError } from "../src/ai/types";
 import { useVoiceRecording } from "../src/hooks/useVoiceRecording";
 
 type TabKey = "manual" | "photo" | "voice";
@@ -52,8 +50,24 @@ const TABS: { key: TabKey; labelKey: string }[] = [
 
 let nextId = 100;
 
-function generateUUID(): string {
-  return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+function getLocalizedAIError(err: unknown, t: (key: string) => string): string {
+  if (err instanceof AIError) {
+    const map: Record<string, string> = {
+      NOT_CONFIGURED: "aiErrors.notConfigured",
+      INVALID_KEY: "aiErrors.invalidKey",
+      INVALID_MODEL: "aiErrors.invalidModel",
+      INVALID_RESPONSE: "aiErrors.invalidResponse",
+      NETWORK_ERROR: "aiErrors.networkError",
+      TIMEOUT: "aiErrors.timeout",
+      AUDIO_NOT_SUPPORTED: "aiErrors.audioNotSupported",
+      VISION_NOT_SUPPORTED: "aiErrors.visionNotSupported",
+      READ_ERROR: "aiErrors.readError",
+      UNKNOWN: "aiErrors.unknown",
+    };
+    return t(map[err.code] ?? "aiErrors.unknown");
+  }
+  if (err instanceof Error) return err.message;
+  return t("aiErrors.unknown");
 }
 
 export default function AddRecipeScreen() {
@@ -105,7 +119,6 @@ export default function AddRecipeScreen() {
 
   // ── AI state ──
   const { config: aiConfig, isLoaded: aiLoaded } = useAISettings();
-  const [photoText, setPhotoText] = useState("");
   const [photoUri, setPhotoUri] = useState<string | null>(null);
   const [voiceText, setVoiceText] = useState("");
   const [aiLoading, setAiLoading] = useState(false);
@@ -174,9 +187,7 @@ export default function AddRecipeScreen() {
         params: { draft: JSON.stringify(draft) },
       } as any);
     } catch (err) {
-      const msg =
-        err instanceof Error ? err.message : t("aiErrors.unknown");
-      setAiError(msg);
+      setAiError(getLocalizedAIError(err, t));
     } finally {
       setAiLoading(false);
     }
@@ -194,9 +205,7 @@ export default function AddRecipeScreen() {
         params: { draft: JSON.stringify(draft) },
       } as any);
     } catch (err) {
-      const msg =
-        err instanceof Error ? err.message : t("aiErrors.unknown");
-      setAiError(msg);
+      setAiError(getLocalizedAIError(err, t));
     } finally {
       setAiLoading(false);
     }
@@ -214,9 +223,7 @@ export default function AddRecipeScreen() {
         params: { draft: JSON.stringify(draft) },
       } as any);
     } catch (err) {
-      const msg =
-        err instanceof Error ? err.message : t("aiErrors.unknown");
-      setAiError(msg);
+      setAiError(getLocalizedAIError(err, t));
     } finally {
       setAiLoading(false);
     }
@@ -259,8 +266,6 @@ export default function AddRecipeScreen() {
     setSaving(true);
     setSaveError(null);
     try {
-      const recipeId = generateUUID();
-
       await createRecipe({
         title: title.trim(),
         description: description.trim(),
@@ -648,32 +653,57 @@ export default function AddRecipeScreen() {
 
           {activeTab === "photo" && (
             <>
-              <View
-                className="items-center justify-center rounded-2xl border-2 border-dashed py-12 gap-4"
-                style={{
-                  borderColor: colors.outlineStrong,
-                  backgroundColor: colors.surface,
-                }}
-              >
+              {!photoUri ? (
                 <View
-                  className="h-20 w-20 items-center justify-center rounded-2xl"
-                  style={{ backgroundColor: colors.neutral100 ?? colors.outline }}
+                  className="items-center justify-center rounded-2xl border-2 border-dashed py-12 gap-4"
+                  style={{
+                    borderColor: colors.outlineStrong,
+                    backgroundColor: colors.surface,
+                  }}
                 >
-                  <HugeiconsIcon
-                    icon={Camera01Icon}
-                    size={32}
-                    color={colors.primary}
-                    strokeWidth={1.75}
-                  />
-                </View>
+                  <View
+                    className="h-20 w-20 items-center justify-center rounded-2xl"
+                    style={{ backgroundColor: colors.neutral100 ?? colors.outline }}
+                  >
+                    <HugeiconsIcon
+                      icon={Camera01Icon}
+                      size={32}
+                      color={colors.primary}
+                      strokeWidth={1.75}
+                    />
+                  </View>
 
-                <View className="items-center gap-1 px-8">
-                  <ThemedText variant="h4">{t("addRecipe.photo.heading")}</ThemedText>
-                  <ThemedText variant="bodySmall" color="secondary" style={{ textAlign: "center" }}>
-                    {t("addRecipe.photo.subheading")}
-                  </ThemedText>
+                  <View className="items-center gap-1 px-8">
+                    <ThemedText variant="h4">{t("addRecipe.photo.heading")}</ThemedText>
+                    <ThemedText variant="bodySmall" color="secondary" style={{ textAlign: "center" }}>
+                      {t("addRecipe.photo.subheading")}
+                    </ThemedText>
+                  </View>
                 </View>
-              </View>
+              ) : (
+                <View className="rounded-2xl border overflow-hidden" style={{ borderColor: colors.outline }}>
+                  <Image
+                    source={{ uri: photoUri }}
+                    style={{ width: "100%", height: 200, resizeMode: "cover" }}
+                  />
+                  <Pressable
+                    onPress={() => setPhotoUri(null)}
+                    className="absolute top-2 right-2 rounded-full px-2 py-1"
+                    style={{ backgroundColor: colors.error + "CC" }}
+                  >
+                    <ThemedText variant="caption" style={{ color: colors.white, fontFamily: "Baloo2-SemiBold" }}>
+                      {t("addRecipe.photo.removeImage")}
+                    </ThemedText>
+                  </Pressable>
+                </View>
+              )}
+
+              {/* AI / permission errors */}
+              {aiError ? (
+                <ThemedText variant="caption" color="error">
+                  {aiError}
+                </ThemedText>
+              ) : null}
 
               <View className="gap-3">
                 <ThemedButton onPress={handleCamera}>
@@ -711,29 +741,9 @@ export default function AddRecipeScreen() {
                 </ThemedButton>
               </View>
 
-              {/* Selected image preview */}
+              {/* Extract from image button */}
               {photoUri && (
                 <View className="gap-2">
-                  <ThemedText variant="bodySmall" style={{ fontFamily: "Baloo2-SemiBold" }}>
-                    {t("addRecipe.photo.imageSelected")}
-                  </ThemedText>
-                  <View className="rounded-2xl border overflow-hidden" style={{ borderColor: colors.outline }}>
-                    <Image
-                      source={{ uri: photoUri }}
-                      style={{ width: "100%", height: 200, resizeMode: "cover" }}
-                    />
-                    <Pressable
-                      onPress={() => setPhotoUri(null)}
-                      className="absolute top-2 right-2 rounded-full px-2 py-1"
-                      style={{ backgroundColor: colors.error + "CC" }}
-                    >
-                      <ThemedText variant="caption" style={{ color: colors.white, fontFamily: "Baloo2-SemiBold" }}>
-                        {t("addRecipe.photo.removeImage")}
-                      </ThemedText>
-                    </Pressable>
-                  </View>
-
-                  {/* Extract from image button */}
                   {!aiConfig && aiLoaded ? (
                     <View className="rounded-2xl border px-4 py-4 gap-3" style={{ backgroundColor: colors.surface, borderColor: colors.outline }}>
                       <ThemedText variant="bodySmall" style={{ fontFamily: "Baloo2-SemiBold" }}>
@@ -909,7 +919,7 @@ export default function AddRecipeScreen() {
                       color="secondary"
                       style={{ textAlign: "center", fontStyle: "italic" }}
                     >
-                      "{t("addRecipe.voice.sampleQuote")}"
+                      {`“${t("addRecipe.voice.sampleQuote")}”`}
                     </ThemedText>
                   </View>
                 )}

@@ -30,7 +30,8 @@
     "tapToEdit": "Nhấn để sửa",
     "noItems": "Không có mục nào.",
     "seeAll": "Xem tất cả",
-    "minutes": "phút"
+    "minutes": "phút",
+    "saveError": "Lưu thất bại. Vui lòng thử lại."
   },
   "home": {
     "title": "Trang chủ",
@@ -272,6 +273,8 @@
     "baseUrlPlaceholder": "http://localhost:11434",
     "apiKey": "Khóa API",
     "apiKeyPlaceholder": "Nhập khóa API của bạn",
+    "apiKeyOptional": "Khóa API (Tùy chọn)",
+    "apiKeyOptionalPlaceholder": "Để trống nếu không bắt buộc",
     "apiKeyHint": "Khóa của bạn được lưu cục bộ và không bao giờ gửi đến máy chủ Mise.",
     "testConnection": "Kiểm tra kết nối",
     "testSuccess": "Kết nối thành công.",
@@ -290,6 +293,7 @@
     "timeout": "Kết nối hết thời gian. Vui lòng kiểm tra URL máy chủ.",
     "audioNotSupported": "Nhà cung cấp AI này không hỗ trợ đầu vào âm thanh. Vui lòng sử dụng đầu vào văn bản thay thế.",
     "visionNotSupported": "Mô hình này không hỗ trợ đầu vào hình ảnh. Hãy thử mô hình hỗ trợ vision như llava, moondream hoặc llama3.2-vision.",
+    "readError": "Không thể đọc tệp. Vui lòng thử lại.",
     "unknown": "Đã xảy ra lỗi không mong muốn. Vui lòng thử lại."
   },
   "aiReview": {

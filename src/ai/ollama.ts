@@ -123,7 +123,7 @@ export async function listModels(config: AIConfig): Promise<void> {
     }
 
     const data = await response.json();
-    const models: Array<{ name: string }> = data.models ?? [];
+    const models: { name: string }[] = data.models ?? [];
     const found = models.some((m) => m.name === config.model || m.name.startsWith(config.model + ":"));
 
     if (!found) {
@@ -151,7 +151,7 @@ export async function fetchPublicModels(): Promise<string[]> {
     );
     if (!response.ok) return [];
     const data = await response.json();
-    const models: Array<{ name: string }> = data.models ?? [];
+    const models: { name: string }[] = data.models ?? [];
     return models.map((m) => m.name).sort();
   } catch {
     return [];
