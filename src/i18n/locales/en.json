@@ -30,7 +30,8 @@
     "tapToEdit": "Tap to edit",
     "noItems": "No items listed.",
     "seeAll": "See all",
-    "minutes": "min"
+    "minutes": "min",
+    "saveError": "Failed to save. Please try again."
   },
   "home": {
     "title": "Home",
@@ -272,6 +273,8 @@
     "baseUrlPlaceholder": "http://localhost:11434",
     "apiKey": "API Key",
     "apiKeyPlaceholder": "Enter your API key",
+    "apiKeyOptional": "API Key (Optional)",
+    "apiKeyOptionalPlaceholder": "Leave empty if not required",
     "apiKeyHint": "Your key is stored locally and never sent to Mise servers.",
     "testConnection": "Test Connection",
     "testSuccess": "Connection successful.",
@@ -290,6 +293,7 @@
     "timeout": "Connection timed out. Please check your server URL.",
     "audioNotSupported": "This AI provider does not support audio input. Please use text input instead.",
     "visionNotSupported": "This model does not support image input. Try a vision-capable model like llava, moondream, or llama3.2-vision.",
+    "readError": "Failed to read file. Please try again.",
     "unknown": "An unexpected error occurred. Please try again."
   },
   "aiReview": {

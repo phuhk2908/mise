@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { loadAIConfig, saveAIConfig, clearAIConfig } from "../ai/storage";
 import { AIError, type AIConfig, type AIErrorCode } from "../ai/types";
-import { listModels } from "../ai/ollama";
+import { validateConnection } from "../ai/client";
 
 export interface UseAISettingsReturn {
   config: AIConfig | null;
@@ -69,7 +69,7 @@ export function useAISettings(): UseAISettingsReturn {
     setIsTesting(true);
     setTestResult(null);
     try {
-      await listModels(targetConfig);
+      await validateConnection(targetConfig);
       setTestResult({ success: true, message: "TEST_SUCCESS" });
     } catch (err) {
       const code: AIErrorCode =

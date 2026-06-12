@@ -8,7 +8,10 @@ import {
   StyleSheet,
 } from "react-native";
 import { HugeiconsIcon } from "@hugeicons/react-native";
-import { ArrowDown01Icon } from "@hugeicons/core-free-icons";
+import {
+  ArrowDown01Icon,
+  Cancel01Icon,
+} from "@hugeicons/core-free-icons";
 import { ThemedText } from "./ThemedText";
 import { useAppTheme } from "../theme/useAppTheme";
 
@@ -36,7 +39,7 @@ function PickerModal({
   onClose,
 }: PickerModalProps) {
   const { colors, isDark } = useAppTheme();
-  const [query, setQuery] = useState(selected);
+  const [query, setQuery] = useState("");
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -113,21 +116,37 @@ function PickerModal({
 
             {/* Search */}
             <View style={{ paddingHorizontal: 16, paddingBottom: 8 }}>
-              <TextInput
-                value={query}
-                onChangeText={setQuery}
-                placeholder={searchPlaceholder}
-                placeholderTextColor={colors.textMuted}
-                autoFocus
-                className="rounded-xl border px-3 py-2"
+              <View
+                className="flex-row items-center rounded-xl border px-3"
                 style={{
                   borderColor: colors.outline,
-                  color: colors.textPrimary,
-                  fontFamily: "Baloo2-Regular",
-                  fontSize: 14,
                   backgroundColor: colors.background,
                 }}
-              />
+              >
+                <TextInput
+                  value={query}
+                  onChangeText={setQuery}
+                  placeholder={searchPlaceholder}
+                  placeholderTextColor={colors.textMuted}
+                  autoFocus
+                  className="flex-1 py-2"
+                  style={{
+                    color: colors.textPrimary,
+                    fontFamily: "Baloo2-Regular",
+                    fontSize: 14,
+                  }}
+                />
+                {query.length > 0 && (
+                  <Pressable onPress={() => setQuery("")} hitSlop={8}>
+                    <HugeiconsIcon
+                      icon={Cancel01Icon}
+                      size={16}
+                      color={colors.textMuted}
+                      strokeWidth={1.75}
+                    />
+                  </Pressable>
+                )}
+              </View>
             </View>
 
             {/* Options */}
